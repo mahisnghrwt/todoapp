@@ -287,6 +287,7 @@ button {
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 1;
 }
 
 .empty-container {
@@ -304,6 +305,8 @@ button {
   padding: 1rem 2rem; 
   border-radius: 4px;
   box-shadow: 2px 2px 5px grey;
+  z-index: 2;
+  background-color: white;
 }
 
 .create-list-form * {
@@ -324,6 +327,8 @@ button {
   padding: 1rem 2rem; 
   border-radius: 4px;
   box-shadow: 2px 2px 5px grey;
+  z-index: 2;
+  background-color: white;
 }
 
 .row-center {

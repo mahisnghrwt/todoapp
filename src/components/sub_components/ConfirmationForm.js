@@ -1,35 +1,34 @@
-import React from 'react'
-import { useContext } from 'react'
-import { useEffect } from 'react'
-import {requestDeleteMany} from '../APICalls'
-import { Context } from '../Context'
+import React, { useEffect, useState } from 'react'
+import { requestDeleteMany } from '../utility/APICalls'
 
-const ConfirmationForm = ({id, checkedLists, actionHandler}) => {
+const ConfirmationForm = ({checkedLists, actionHandler_}) => {
+    const [ids, setIds]  = useState([])
+    
     const deleteHandler = () => {
-        let ids = []
-        console.log(checkedLists)
+        requestDeleteMany(ids)
+        .then(data => {
+            actionHandler_(true)
+        })
+    }
+
+    useEffect(() => {
+        let ids_ = []
         for (const prop in checkedLists) {
             if (checkedLists[prop] === true) {
-                ids.push(prop)
+                ids_.push(prop)
             }
         }
-        console.log(requestDeleteMany(ids))
-        actionHandler(true)
-    }
-
-    const {mainState} = useContext(Context)
-    if (mainState.clickOwnerId != id) {
-        return (null)
-    }
+        setIds(ids_)
+    }, [])
 
     return (
-        <div className="confirmation-form" onClick={(event) => {event.stopPropagation(); console.log("ConfirmationForm has been clicked!")}}>
+        <div className="confirmation-form" onClick={(event) => { event.stopPropagation() }}>
             <div className="row-center">
-                <span>Are you sure you wanna delete the lists?</span>
+                { ids.length === 0 ? <span>You must select atleast one list.</span> : <span>Are you sure you wanna delete the lists?</span> }
             </div>
             <div className="row-center">
-                <button className="danger" onClick={deleteHandler}>Yes, Delete</button>
-                <button onClick={() => actionHandler(false)}>Cancel</button>
+                {ids.length > 0 && <button className="danger" onClick={deleteHandler}>Yes, Delete</button>}
+                <button onClick={() => actionHandler_(false)}>{ ids.length === 0 ? "Okay" : "Cancel" }</button>
             </div>
         </div>
     )

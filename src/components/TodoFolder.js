@@ -1,24 +1,17 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useRef} from 'react'
 import List from './List'
 import {Context} from './Context'
-import {requestDelete, requestAll} from './APICalls'
+import {requestDelete, requestAll} from './utility/APICalls'
 import {CreateListForm} from './sub_components/CreateListForm'
 import Header from './Header'
 import ConfirmationForm from './sub_components/ConfirmationForm'
 
-function idGenerator() {
-    if (typeof idGenerator.counter == 'undefined') {
-        idGenerator.counter = 1;
-    }
-    idGenerator.counter++;
-    return idGenerator.counter;
-}
-
-const TodoFolder = (props) => {
+const TodoFolder = () => {
     //States
     const [state, setState] = useState([])
-    const [mainState, setMainState] = useState({coreData: null, contextMenuEnabled: false, contextPos: [0, 0], clickOwnerId: -1})
+    const [mainState, setMainState] = useState({coreData: null, createListForm: false, contextMenuEnabled: false, clickId: 0})
     const [checkedLists, setCheckedLists] = useState({})
+    const checkListRef = useRef(checkedLists)
 
     //Event handlers
     const onDeleteList = (id) => {
@@ -30,21 +23,29 @@ const TodoFolder = (props) => {
         })
     }
 
-    const onAddList = (event) => {
-        setMainState((prevState) => {
-            return {...prevState, addListFormEnabled: !prevState.addListFormEnabled}
+
+    // onClick = "create List +" button
+    const addListHandler = (event) => {
+        event.stopPropagation()
+        setMainState((prev) => {
+            return {
+                ...prev, createListForm: !prev.createListForm
+            }
         })
     }
-
+ 
     //Fetch lists from the API
     useEffect(() => {
-       document.addEventListener("click", () => {
-            console.log("document event listener triggered!")
-            setMainState((prevState) => {
+        const currentState = () => {
+            setMainState((prev) => {
                 return {
-                    ...prevState, clickOwnerId: -1
+                    ...prev, clickId: prev.clickId + 1, createListForm: false, deleteListForm: false
                 }
-            })
+            })   
+        }
+
+        window.addEventListener("click", () => {
+            currentState()
         })
        requestAll()
        .then((data) => {
@@ -56,8 +57,7 @@ const TodoFolder = (props) => {
                 tempMap[x._id] = false
            })
            setCheckedLists(tempMap) 
-           console.log(checkedLists)
-
+           checkListRef.current = tempMap
        })
     }, [])
 
@@ -67,22 +67,39 @@ const TodoFolder = (props) => {
         )
     }
 
-    const clickHandler = (id_) => {
-        console.log(checkedLists)
+    const checkListHandler = (id_) => {
         setCheckedLists((prevState) => {
-            return {...prevState, [id_]: !prevState[id_]}
+            checkListRef.current = prevState
+            return {
+                ...prevState, [id_]: !prevState[id_]
+            }
         })
     }
 
+    useEffect(() => {
+        // console.log(checkedLists)
+    }, [checkedLists])
+
     const deleteListHandler = (event) => {
-        if (mainState.clickOwnerId === -1) {
-            event.stopPropagation()
-        }
+        event.stopPropagation()
         setMainState((prevState) => {
             return {
-                ...prevState, clickOwnerId: 100
+                ...prevState, deleteListForm: !prevState.deleteListForm
             }
         })
+    }
+
+    const actionHandler = (success) => {
+        setMainState((prevState) => {
+            return {...prevState, createListForm: false, deleteListForm: false}
+        })
+
+        if (success === false) {
+            return
+        }
+
+        requestAll()
+        .then((data) => setState(data))
     }
     
     return (
@@ -91,23 +108,32 @@ const TodoFolder = (props) => {
                 <Header />
                 <div className = "content">
                     <div className="quick-buttons">
-                        <button onClick = {onAddList}>
-                            {mainState.addListFormEnabled === true ? "Create" : "New List +"}
+                        <button onClick = {addListHandler}>
+                            New List +
                         </button>
-                        <button className = "danger" onClick = {deleteListHandler}>
+                        <button className="danger" onClick={deleteListHandler}>
                             Delete List -
                         </button>
                     </div>
                     <hr />
                     <div className = {state.length !== 0 ? "main-content" : "main-content empty-container"}>
                         <ul className = "folder">
-                            {mainState.addListFormEnabled === true && <CreateListForm wasSuccess={(success) => { 
-                                setMainState((prevState) => {return {...prevState, addListFormEnabled: false}})
-                                success === true && requestAll().then((data) => setState(data))
-                            }}/>}
-                            <ConfirmationForm id={100} checkedLists={checkedLists} actionHandler={(success) => {setMainState((prevState) => { return {...prevState, deleteListFormEnabled: false} })}}/>
-                            {state.length === 0 && <EmptyDir />}
-                            {state.map((x, index) => <List key = {index} checkedToggler={clickHandler} deleteHandler={onDeleteList} isChecked={checkedLists[x._id]} data = {x}/>)}
+                            {
+                                mainState.createListForm === true && <CreateListForm wasSuccess={actionHandler}/>
+                            }
+                            {
+                                mainState.deleteListForm === true && <ConfirmationForm checkedLists={checkedLists} actionHandler_={actionHandler}/>
+                            }
+                            {
+                                //if there are no list, display the message for the user
+                                state.length === 0 && <EmptyDir />
+                            }
+                            {
+                                state.map((x) => {
+                                    return <List key={x._id} checkedToggler={checkListHandler} deleteHandler={onDeleteList} isChecked={checkedLists[x._id]} data={x}/>
+                                }
+                                )
+                            }
                         </ul>
                     </div>
                 </div>

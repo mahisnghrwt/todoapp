@@ -15,7 +15,7 @@ export const requestDeleteMany = async (ids) => {
         },
         body: JSON.stringify({ids: ids})
     })
-    return response.json()
+    return response
 }
 
 export const requestAll = async () => {
