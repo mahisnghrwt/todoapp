@@ -1,18 +1,16 @@
 import React from 'react'
 
-class Header extends React.Component {
-    render() {
-        return (
-            <header>
-                <div className="title">
-                TodoApp
-                </div>
-                <div className="navigation">
-                root /
-                </div>
-            </header>
-        )
-    }
+const Header = ({title, nav}) => {
+    return (
+        <header>
+            <div className="title">
+                {title}
+            </div>
+            <div className="navigation">
+                {nav}
+            </div>
+        </header>
+    )
 }
 
 export default Header;

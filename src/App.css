@@ -7,6 +7,7 @@
 :scope {
   --danger: #e74c3c;
   --info: #f1c40f;
+  --standard: #3498db;
 }
 
 * {
@@ -48,8 +49,10 @@ html, body, #root, .App {
   background-color: white;
   height:  100%;
   width: 100%;  
+  padding: 0 1rem;
   display: flex;
   flex-flow: column;
+  box-sizing: border-box;
   align-items: center;
   border-radius: 4px;
 }
@@ -93,12 +96,26 @@ button {
   border: 0;
 }
 
+button:hover {
+  border: 1px black solid;
+}
+
+
+.small-button {
+  font-size: 0.85rem; 
+  padding: .15rem .5rem;
+}
+
+.standard {
+  background-color: var(--standard);
+}
+
 .content {
-  margin: 1rem 0 0 0;
+  margin: .5rem 0;
   width: 100%;
   box-sizing: border-box;
   padding: 1.5rem;
-  height: 100%;
+  /* height: 100%; */
   display: flex;
   flex-direction: column;
 }
@@ -129,6 +146,8 @@ button {
   display: flex;
   flex-flow: column wrap;
   flex-grow: 1;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .edit-content {
@@ -156,11 +175,12 @@ button {
 .folder li {
   padding: .20rem .25rem;
   border: #bdc3c7 1px solid;
-  margin: .1rem 0;
+  margin: 1rem 0;
   border-radius: 3px;
   display: flex;
   flex-direction: row;
   align-items: baseline;
+  height: fit-content;
 }
 
 .folder li * {
@@ -341,4 +361,13 @@ button {
 
 .row-center * {
   margin: 0 .5rem;
+}
+
+.todo-item {
+  display: flex;
+  flex-direction: row;
+}
+
+.todo-item .item-title {
+  flex-grow: 2;
 }

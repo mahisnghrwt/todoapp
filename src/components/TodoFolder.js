@@ -1,5 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react'
 import List from './List'
+import QuickButtons from './QuickButtons'
 import {Context} from './Context'
 import {requestDelete, requestAll} from './utility/APICalls'
 import {CreateListForm} from './sub_components/CreateListForm'
@@ -105,16 +106,20 @@ const TodoFolder = () => {
     return (
         <Context.Provider value={{mainState, setMainState}}>
             <div className="root">
-                <Header />
+                <Header title="TodoApp" nav="root" />
                 <div className = "content">
-                    <div className="quick-buttons">
-                        <button onClick = {addListHandler}>
-                            New List +
-                        </button>
-                        <button className="danger" onClick={deleteListHandler}>
-                            Delete List -
-                        </button>
-                    </div>
+                    <QuickButtons data={[
+                        {
+                            name: "New List +",
+                            className_: null,
+                            eventListener: addListHandler
+                        },
+                        {
+                            name: "Delete List -",
+                            className_: "danger",
+                            eventListener: deleteListHandler
+                        }
+                    ]} />
                     <hr />
                     <div className = {state.length !== 0 ? "main-content" : "main-content empty-container"}>
                         <ul className = "folder">

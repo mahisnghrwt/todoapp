@@ -19,13 +19,22 @@ const List = ({data, deleteHandler, checkedToggler, isChecked}) =>  {
         checkedToggler(data._id)
     }
 
+    const destination = {
+        pathname: '/list/' + data._id,
+        state: {
+            name: "state from navlink to"
+        }
+    }
+
     return (
-        <ContextMenu items={contextMenuProps.items} listener={contextMenuProps.listener}>
-            <li className="list-li" onClick={clickHandler}>
-                <input type="checkbox" checked={isChecked} readOnly/>
-                {data.name}
-            </li>
-        </ContextMenu>
+        <NavLink to={destination}>
+            <ContextMenu items={contextMenuProps.items} listener={contextMenuProps.listener}>
+                <li className="list-li" onClick={clickHandler}>
+                    <input type="checkbox" checked={isChecked} readOnly/>
+                    {data.name}
+                </li>
+            </ContextMenu>
+        </NavLink>
     )
 }
 

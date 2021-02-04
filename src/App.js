@@ -2,6 +2,7 @@ import './App.css';
 import React from 'react'
 import {Route, HashRouter, useParams, Switch} from 'react-router-dom'
 import TodoFolder from './components/TodoFolder'
+import TodoList from './components/TodoList'
 
 const App = (props) => {
 
@@ -9,11 +10,11 @@ const App = (props) => {
       <div className="App">       
           <HashRouter>
             <Switch>
-              <Route path = "/">
+              <Route exact path = "/">
                 <TodoFolder />
               </Route>
-              <Route path = "/somethingnew">
-                This is the new URL
+              <Route path = "/list/:id">
+                <TodoList />
               </Route>
             </Switch>
           </HashRouter>
