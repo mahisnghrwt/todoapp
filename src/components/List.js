@@ -22,7 +22,7 @@ const List = ({data, deleteHandler, checkedToggler, isChecked}) =>  {
     const destination = {
         pathname: '/list/' + data._id,
         state: {
-            name: "state from navlink to"
+            data: data
         }
     }
 

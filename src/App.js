@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react'
-import {Route, HashRouter, useParams, Switch} from 'react-router-dom'
+import {Route, HashRouter, Switch} from 'react-router-dom'
 import TodoFolder from './components/TodoFolder'
 import TodoList from './components/TodoList'
 
@@ -20,11 +20,6 @@ const App = (props) => {
           </HashRouter>
       </div>
   );
-}
-
-function GetId() {
-  let {id} = useParams();
-  return id;
 }
 
 export default App;

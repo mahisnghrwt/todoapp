@@ -1,4 +1,5 @@
 const ENDPOINT = "http://localhost:5001/api"
+const ENDPOINT_TODOITEM = "http://localhost:5001/api/todoitem"
 
 export const requestDelete = async (id) => {
     const response = await fetch(ENDPOINT + "/" + id, {
@@ -31,5 +32,10 @@ export const requestCreate = async (name) => {
         },
         body: JSON.stringify({name: name})
     })
+    return response.json()
+}
+
+export const requestTodo = async (id) => {
+    const response = await fetch(ENDPOINT_TODOITEM + "/" + id)
     return response.json()
 }

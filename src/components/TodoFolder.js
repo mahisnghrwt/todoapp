@@ -37,6 +37,7 @@ const TodoFolder = () => {
  
     //Fetch lists from the API
     useEffect(() => {
+        let mounted = true;
         const currentState = () => {
             setMainState((prev) => {
                 return {
@@ -50,6 +51,7 @@ const TodoFolder = () => {
         })
        requestAll()
        .then((data) => {
+           if (!mounted) return
            setState(data)
 
            //Init the 'chekedLists' map with false values
@@ -60,6 +62,11 @@ const TodoFolder = () => {
            setCheckedLists(tempMap) 
            checkListRef.current = tempMap
        })
+
+       return function cleanup() {
+           mounted = false
+           window.removeEventListener("click", currentState)
+       }
     }, [])
 
     const EmptyDir = (props) => {
@@ -76,10 +83,6 @@ const TodoFolder = () => {
             }
         })
     }
-
-    useEffect(() => {
-        // console.log(checkedLists)
-    }, [checkedLists])
 
     const deleteListHandler = (event) => {
         event.stopPropagation()

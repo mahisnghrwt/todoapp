@@ -1,14 +1,33 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import QuickButtons from './QuickButtons'
 import Header from './Header'
 import TodoItem from './TodoItem'
 import {useParams, useLocation} from 'react-router-dom'
+import {requestTodo} from './utility/APICalls'
 
 const TodoList = (props) => {
     //list id
     const {id} = useParams()
     //get list data
-    const data = useLocation()
+    const [todoItems, setTodoItems] = useState([])
+    const locState = useLocation().state
+
+    useEffect(() => {
+        if (typeof locState === "undefined") {
+            //if the todoItems array is not passed from the "navLink to", then use the "id" to fetch it from the database
+            requestTodo(id)
+            .then((data) => {
+                setTodoItems(() => {
+                    return data.todoItems
+                })
+            })
+        }
+        else {
+            setTodoItems(() => {
+                return locState.data
+            })
+        }
+    }, [])
 
     const newItemHandler = () => {
 
@@ -37,8 +56,13 @@ const TodoList = (props) => {
                 <hr />
                 <div className="main-content">
                     <ul className="folder">
-                        
-                        <TodoItem />
+                        {
+                            typeof todoItems != "undefined" &&
+                            todoItems.length !== 0 &&
+                            todoItems.map((x) => {
+                                return <TodoItem data={x}/>
+                            })
+                        }
                     </ul>
                 </div>
             </div>

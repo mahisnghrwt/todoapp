@@ -175,7 +175,7 @@ button:hover {
 .folder li {
   padding: .20rem .25rem;
   border: #bdc3c7 1px solid;
-  margin: 1rem 0;
+  margin: .25rem 0;
   border-radius: 3px;
   display: flex;
   flex-direction: row;
@@ -365,9 +365,21 @@ button:hover {
 
 .todo-item {
   display: flex;
+  flex-direction: column;
+}
+
+.todo-item-basic {
+  width: 100%;
+  height: fit-content;
+  align-items: baseline;
+  display: flex;
   flex-direction: row;
 }
 
-.todo-item .item-title {
+.todo-item-basic .item-title {
   flex-grow: 2;
+}
+
+.todo-item-detailed {
+  
 }
