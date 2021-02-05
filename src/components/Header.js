@@ -7,10 +7,10 @@ const Header = ({title, nav}) => {
                 {title}
             </div>
             <div className="navigation">
-                {nav}
+                root / {nav}
             </div>
         </header>
     )
 }
 
-export default Header;
+export default React.memo(Header);

@@ -167,6 +167,8 @@ button:hover {
   overflow: auto;
 }
 
+
+
 .navLink {
   text-decoration: none;
   color: unset;
@@ -363,23 +365,124 @@ button:hover {
   margin: 0 .5rem;
 }
 
+.folder-v2 {
+  display: flex;
+  flex-flow: column;
+  box-sizing: border-box;
+}
+
 .todo-item {
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  padding: .5rem;
+  margin: .25rem 0;
+  border: #bdc3c7 1px solid;
+}
+
+.danger-border {
+  border: 1px var(--danger) solid;
+}
+
+.info-border {
+  border: 1px var(--info) solid;
+}
+
+.standard-border {
+  border: 1px var(--standard) solid;
 }
 
 .todo-item-basic {
   width: 100%;
   height: fit-content;
-  align-items: baseline;
   display: flex;
   flex-direction: row;
+  align-items: baseline;
 }
 
-.todo-item-basic .item-title {
-  flex-grow: 2;
+.todo-item-basic > * {
+  margin: 0 .25rem;
+}
+
+.item-quick-buttons {
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  padding: 0 1rem;
+}
+
+.item-quick-buttons button {
+  margin: 0 .15rem;
+  background-color: var(--standard);
+  padding: .15rem .7rem;
+  border: 1px black solid;
+}
+
+.item-title {
+  flex-grow: 5;
 }
 
 .todo-item-detailed {
-  
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: baseline;
+}
+
+.todo-item-detailed * {
+  margin: 0 1rem;
+}
+
+.item-created-on {
+  font-size: .85rem;
+}
+
+/* .completed {
+  height:inherit;
+  width: inherit;
+  display: block;
+  background-color: rgba(0, 0, 0, .55);
+} */
+
+
+.popup-form {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  box-sizing: border-box;
+  height: fit-content;
+  width: fit-content;
+  display: flex;
+  flex-flow: column nowrap;
+  z-index: 2;
+  background-color: white;
+  border: 1px black dotted;
+}
+
+.popup-indiv-form {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+}
+
+.popup-title {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.popup-indiv-form * {
+  margin: .25rem 1rem;
+  width: 20rem;
+}
+
+.contextmenu-v2 {
+  position: absolute;
+  z-index: 2;
+  height: fit-content;
+  width: fit-content;
+  list-style-type: none;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px grey solid;
 }

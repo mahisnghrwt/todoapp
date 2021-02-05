@@ -5,13 +5,18 @@ import uuid from './utility/uuid'
 const QuickButtons = ({data}) => {
     if (data == null)
         return(null)
-
     return (
         <div className="quick-buttons">
             {
                 data.map(({name, className_, eventListener}) => {
                     return (
-                        <button key={uuid.get()} onClick={eventListener} className={className_ == null ? "" : className_}>
+                        <button 
+                            key={uuid.get()} 
+                            onClick={(event) => {
+                                event.stopPropagation()
+                                eventListener()
+                            }}  
+                            className={className_ == null ? "" : className_}>
                             {name}
                         </button>
                     )
