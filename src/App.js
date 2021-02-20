@@ -1,10 +1,13 @@
 import './ModernApp.css';
+
 import React, {useEffect, useState, useContext} from 'react'
 import {Route, HashRouter, Switch, Link, useParams, Redirect} from 'react-router-dom'
-import Login from './components/Login'
 import {AuthContext} from './components/Context'
+
+import Login from './components/Login'
 import Home from './components/Home'
 import List from './components/List'
+import Todo from './components/Todo'
 
 const App = (props) => {
   const [auth, setAuth] = useState({})
@@ -27,10 +30,13 @@ const App = (props) => {
                 <Login />
               </Route>
               <Route exact path = "/">
-                <List />
+                <Home />
               </Route>
               <Route exact path = "/list">
                 <List />
+              </Route>
+              <Route exact path = "/todo">
+                <Todo />
               </Route>
             </Switch>
           </HashRouter>

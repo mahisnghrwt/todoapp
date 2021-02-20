@@ -1,13 +1,15 @@
 import React from 'react'
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faFile, faSort} from '@fortawesome/free-solid-svg-icons'
 
-const QuickButtons = props => {
+const QuickButtons = _ => {
     return (
         <div className="quick-buttons">
             <button>
-                New +
+                <FontAwesomeIcon icon={faFile} /> New
             </button>
             <button>
-                Sort
+                <FontAwesomeIcon icon={faSort} /> Sort
             </button>
         </div>
     )

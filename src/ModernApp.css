@@ -8,6 +8,7 @@
 
 * {
     font-size: 1rem;
+    font-family: sans-serif;
 }
 
 .App {
@@ -27,7 +28,7 @@
 
 
 .nav {
-    background-color: #38ada9;
+    background-color: #82ccdd;
     height: 2rem;
     display: flex;
     flex-flow: row nowrap;
@@ -91,11 +92,27 @@ button {
     padding: 0 0rem;
 }
 
-.li-todo, .li-list {
+.li-list {
     /* border: 1px blue solid; */
     background-color: #F7F9FB;
     margin: .25rem 0;
     padding: 0.5rem .5rem;
+    display: flex;
+    flex-direction: row;
+}
+
+.li-todo {
+    /* border: 1px blue solid; */
+    background-color: #F7F9FB;
+    margin: .25rem 0;
+    padding: 0.5rem .5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.li-todo-basic {
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: row;
 }
@@ -105,16 +122,17 @@ button {
     margin: 0;
     padding: 0;
     margin-left: auto;
+    margin-right: 1rem;
     display: flex;
     flex-direction: row;
 }
 
 .indicator {
-    margin: 0 .35rem;
+    margin: 0 .4rem;
 }
 
 .indicator * {
-    margin: 0 .2rem;
+    margin: 0 .15rem;
 }
 
 .li-todo-age {
@@ -138,16 +156,53 @@ button {
 /* Priorities */
 
 .high-priority {
-    /* background-color: #f8c291; */
     border-left: 4px #e55039 solid;
 }
 
 .moderate-priority {
-    /* background-color: #f8c291; */
     border-left: 4px #e55039 solid;
 }
 
 .low-priority {
-    /* background-color: #f8c291; */
     border-left: 4px #e55039 solid;
+}
+
+/* Todo-form */
+.todo-form {
+    /* border: 1px black solid; */
+    margin: 0;
+    padding: .5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: row;
+    /* justify-content: space-around; */
+    margin: 0 0 1rem 0;
+    padding: 0;
+    /* border: 1px red solid; */
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 1rem 0;
+    padding: 0;
+}
+
+.input-group label {
+    margin: 0 0 .3rem 0;
+}
+
+.form-row .input-group {
+    margin: 0 1rem 0 0;
+}
+
+input[type=text], select, textarea, option {
+    /* Dynamic */
+    border: 1px lightgrey solid;
+    padding: .25rem .5rem;
+    font-size: .9rem;
 }
