@@ -2,22 +2,22 @@ import React from 'react'
 
 import Nav from './Nav'
 import QuickButtons from './QuickButtons'
-import UlTodo from './UlTodo/UlTodo'
+import UlList from './UlList/UlList'
 
-const List = _ => {
+const Home = _ => {
     return (
         <div className="home">
             <Nav />
             <div className="content">
                 <div className="title">
-                    &lt;list-name&gt;
+                    My Lists
                 </div>
                 <QuickButtons />
                 <br />
-                <UlTodo />
+                <UlList />
             </div>
         </div>
     )
 }
 
-export default List
+export default Home

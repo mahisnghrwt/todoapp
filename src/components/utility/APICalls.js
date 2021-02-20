@@ -12,6 +12,7 @@ export const requestDeleteMany = async (ids) => {
     const response = await fetch(ENDPOINT, {
         method: 'DELETE',
         headers: {
+            'Access-Control-Allow-Origin':'http://localhost:3000/',
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ids: ids})
@@ -20,7 +21,9 @@ export const requestDeleteMany = async (ids) => {
 }
 
 export const requestAll = async () => {
-    const response = await fetch(ENDPOINT)
+    const response = await fetch(ENDPOINT, {
+        credentials: 'include'
+    })
     return response.json()
 }
 
@@ -30,12 +33,25 @@ export const requestCreate = async (name) => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({name: name})
+        body: JSON.stringify({title: name}),
+        credentials: 'include'
     })
     return response.json()
 }
 
 export const requestTodo = async (id) => {
     const response = await fetch(ENDPOINT_TODOITEM + "/" + id)
+    return response.json()
+}
+
+export const requestTodoCreate = async (data) => {
+    const response = await fetch(ENDPOINT_TODOITEM, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+
     return response.json()
 }

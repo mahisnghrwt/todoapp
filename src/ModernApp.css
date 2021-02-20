@@ -1,0 +1,153 @@
+:root {
+    --nav-bottom-margin: 5rem;
+    --narrow-width: 70%;
+    --danger: #e74c3c;
+    --warning: #f1c40f;
+    --success: #2ecc71;
+}
+
+* {
+    font-size: 1rem;
+}
+
+.App {
+    padding: 0;
+    margin: 0;
+    background-color: white;
+    height: 100%;
+    width: 100%;
+    margin-left: auto;
+}
+
+.home {
+    width: inherit;
+    height: fit-content;
+    padding: 0;
+}
+
+
+.nav {
+    background-color: #38ada9;
+    height: 2rem;
+    display: flex;
+    flex-flow: row nowrap;
+    padding: 1rem;
+    margin: 0 0 3rem 0;
+}
+
+.logo {
+    height: fit-content;
+    background-color: #2d3436;
+    color: white;
+    padding:.25rem 1rem;
+    border: 0;
+    border-radius: 4px;
+}
+
+.settings {
+    margin-left: auto;
+}
+
+.content {
+    width: 40%;
+    margin: 0 auto;
+    padding: 0;
+    border: 1px lightgrey solid;
+}
+
+.title {
+    width: 100%;
+    color: black;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 0 1rem 0;
+    text-align: center;
+}
+
+.quick-buttons {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+.quick-buttons button {
+    padding: .25rem 1rem;
+    margin: 0 .25rem;
+    border-radius: 0;
+    font-size: .95rem;
+}
+
+button {
+    font-size: 1rem;
+    padding:.5rem 1rem;
+    border: 0;
+    width: 7rem;
+    border-radius: 4px;
+}
+
+.ul-todo, .ul-list {
+    /* border: 1px red solid; */
+    padding: 0 0rem;
+}
+
+.li-todo, .li-list {
+    /* border: 1px blue solid; */
+    background-color: #F7F9FB;
+    margin: .25rem 0;
+    padding: 0.5rem .5rem;
+    display: flex;
+    flex-direction: row;
+}
+
+.li-todo-right, .li-list-right {
+    width: fit-content;
+    margin: 0;
+    padding: 0;
+    margin-left: auto;
+    display: flex;
+    flex-direction: row;
+}
+
+.indicator {
+    margin: 0 .35rem;
+}
+
+.indicator * {
+    margin: 0 .2rem;
+}
+
+.li-todo-age {
+    color: grey;
+}
+
+/* Utility */
+
+.success {
+    background-color: #00b894;
+}
+
+.warning-text {
+    color: var(--warning);
+}
+
+.danger-text {
+    color: var(--danger)
+}
+
+/* Priorities */
+
+.high-priority {
+    /* background-color: #f8c291; */
+    border-left: 4px #e55039 solid;
+}
+
+.moderate-priority {
+    /* background-color: #f8c291; */
+    border-left: 4px #e55039 solid;
+}
+
+.low-priority {
+    /* background-color: #f8c291; */
+    border-left: 4px #e55039 solid;
+}
