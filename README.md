@@ -2,4 +2,4 @@
 
 ### Notes
 #### Home Component
-[] (docs/notes/notes-home.png)
+[](docs/notes/notes-home.png)
