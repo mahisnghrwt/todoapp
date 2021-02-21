@@ -2,4 +2,4 @@
 
 ### Notes
 #### Home Component
-[](docs/notes/notes-home.png)
+![Notes](docs/notes/notes-home.png)
