@@ -1,7 +1,7 @@
 import React from 'react'
 
 import Nav from './Nav'
-import QuickButtons from './QuickButtons'
+import {QuickButtons, ButtonC} from './QuickButtons'
 
 const Todo = _ => {
     return (

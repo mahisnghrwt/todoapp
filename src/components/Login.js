@@ -1,10 +1,10 @@
 import React, {useContext} from 'react'
 import {GoogleLogin} from 'react-google-login'
-import {AuthContext} from './Context'
+import {DataContext} from './Context'
 import {useHistory} from 'react-router-dom'
 
 const Login = props => {
-    const [auth, setAuth] = useContext(AuthContext)
+    const [data, setData] = useContext(DataContext)
     let history = useHistory()
     //Verify idToken with the server, login user if green flagged, otherwise throw error
     const verifyToken = async response => {
@@ -22,9 +22,11 @@ const Login = props => {
         console.log("response status", res.status)
         if (res.status === 200) {
             console.log("Authentication suucessful!")
-            setAuth((prev) => {
+            setData((prev) => {
                 return {
-                    ...prev, loggedIn: true
+                    ...prev, auth: {
+                        loggedIn: true
+                    }
                 }
             })
             history.push("/")
@@ -43,15 +45,18 @@ const Login = props => {
     const onFailure = async response => {
         console.log("Authentication failed at front-end layer.")
         console.log(response)
-        setAuth((prev) => {
+        setData((prev) => {
             return {
-                ...prev, loggedIn: false
+                ...prev, auth: {
+                    loggedIn: false
+                }
             }
         })
     }
     
     return (
         <div className="login">
+            <div className="logo-title">TodoApp</div>
             <GoogleLogin
                 render={ props => (<button onClick={props.onClick} disabled={props.disabled}>Login with Google</button>) }
                 clientId={process.env.REACT_APP_CLIENT_ID}
