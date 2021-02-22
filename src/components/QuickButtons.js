@@ -10,7 +10,7 @@ export class ButtonC {
     }
 }
 
-const Button = ({ button }) => {
+export const Button = ({ button }) => {
     return (
         <button onClick={button.onClick}>
             {button.faIcon != null && <FontAwesomeIcon icon={button.faIcon} />} {button.title}

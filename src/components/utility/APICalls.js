@@ -2,9 +2,16 @@ const ENDPOINT = "http://localhost:5001/api"
 const ENDPOINT_TODOITEM = "http://localhost:5001/api/todoitem"
 
 export const requestDelete = async (id) => {
-    const response = await fetch(ENDPOINT + "/" + id, {
-        method: 'DELETE'
+    const response = await fetch(ENDPOINT, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({_id: id}),
     })
+    if (response.status != 200)
+        console.log("Something went wrong while deleting")
     return response.json()
 }
 
@@ -36,6 +43,19 @@ export const requestCreate = async (name) => {
         body: JSON.stringify({title: name}),
         credentials: 'include'
     })
+    return response.json()
+}
+
+export const requestUpdate = async (id, title) => {
+    const response = await fetch(ENDPOINT, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({_id: id, title: title}),
+        credentials: 'include'
+    })
+    if (response.status != 200) console.log("BAD!")
     return response.json()
 }
 

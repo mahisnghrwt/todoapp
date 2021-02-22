@@ -77,11 +77,13 @@ html, #root, body {
     flex-direction: row;
 }
 
-.quick-buttons button {
-    padding: .25rem 1rem;
+button {
+    padding: .25rem 1.5rem;
     margin: 0 .25rem;
     border-radius: 0;
     font-size: .95rem;
+    height: fit-content;
+    border: 0;
 }
 
 .dropdown {
@@ -105,18 +107,12 @@ html, #root, body {
     background-color: #f1f1f1;
 }
 
-button {
-    font-size: 1rem;
-    padding:.5rem 1rem;
-    border: 0;
-    width: 7rem;
-    border-radius: 4px;
-}
-
 .ul-todo, .ul-list {
     /* border: 1px red solid; */
     padding: 0 0rem;
 }
+
+
 
 .li-list {
     /* border: 1px blue solid; */
@@ -161,12 +157,22 @@ button {
     flex-direction: row;
 }
 
+.indicator-group {
+    padding: 0;
+    margin: 0 0 0 2rem;
+}
+
 .indicator {
-    margin: 0 .4rem;
+    margin: 0 .3rem;
 }
 
 .indicator * {
     margin: 0 .15rem;
+    font-size: 0.75rem;
+}
+
+.indicator-fa {
+    font-size: 1rem;
 }
 
 .indicator-count {
@@ -202,6 +208,10 @@ button {
 }
 
 /* Todo-form */
+label {
+    font-size: .9rem;
+}
+
 .todo-form {
     /* border: 1px black solid; */
     margin: 0;
@@ -241,6 +251,33 @@ input[type=text], select, textarea, option {
     font-size: .9rem;
 }
 
+.create-list {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-title {
+    padding: 0 .1rem;
+    margin: 0;
+    color: darkgrey;
+    font-style: italic;
+    font-size: .8rem;
+}
+
+.inline {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+}
+
+.inline label, input {
+    padding: 0;
+    margin: 0 .25rem;
+}
+
 /* Login */
 
 .login {
@@ -256,3 +293,12 @@ input[type=text], select, textarea, option {
     width: fit-content;
 }
 
+.fa-rename {
+    font-size: .75rem;
+    margin: 0 .5rem;
+}
+
+.li-title-rename {
+    width: fit-content;
+    padding: 0;
+}

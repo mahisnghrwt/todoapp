@@ -3,7 +3,7 @@ import React from 'react'
 import Nav from './Nav'
 import {QuickButtons, ButtonC} from './QuickButtons'
 
-const Todo = _ => {
+const TodoEdit = _ => {
     return (
         <div className="home">
             <Nav />
@@ -38,4 +38,4 @@ const Todo = _ => {
     )
 }
 
-export default Todo
+export default TodoEdit
