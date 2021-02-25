@@ -5,6 +5,9 @@ import {QuickButtons, ButtonC} from './QuickButtons'
 import UlTodo from './UlTodo/UlTodo'
 
 const List = _ => {
+    const buttons = [
+        new ButtonC("New", null, null)
+    ]
     return (
         <div className="home">
             <Nav />
@@ -12,7 +15,7 @@ const List = _ => {
                 <div className="title">
                     &lt;list-name&gt;
                 </div>
-                <QuickButtons />
+                <QuickButtons buttons={buttons} />
                 <br />
                 <UlTodo />
             </div>

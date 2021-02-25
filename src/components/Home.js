@@ -8,6 +8,8 @@ import Nav from './Nav'
 import {QuickButtons, ButtonC, Button} from './QuickButtons'
 import UlList from './UlList/UlList'
 
+var arraySort = require('array-sort')
+
 const CreateListForm = ({toggleSelf}) => {
     const [state, setState] = useState({listTitle: ""})
     const [data, setData] = useContext(DataContext)
@@ -54,6 +56,11 @@ const CreateListForm = ({toggleSelf}) => {
 const Home = _ => {
     const [data, setData] = useContext(DataContext)
     const [state, setState] = useState({createListFormEnabled: false})
+    const sortType = {
+        ALPHABETICAL: "title",
+        PENDING_ITEMS: "pendingCount",
+        HIGH_PRIORITY_ITEMS: "highPriorityCount"
+    }
 
     //Event handler for "New" list button
     const toggleForm = event => {
@@ -64,11 +71,27 @@ const Home = _ => {
         })
     }
 
+    const sortList = param => {
+        var listsCpy = data.userData.todoLists
+        arraySort(listsCpy, param)
+        setData(prev => {
+            return (
+                {
+                    ...prev, userData: {
+                        todoLists: listsCpy
+                    }
+                }
+            )
+        })
+    }
+
     //Buttons, we will pass to "QuickButtons" component
     const buttons = [
                         new ButtonC("New", faFile, toggleForm),
                         new ButtonC("Sort", faSort, null, [
-                            new ButtonC("Alphabetical", null, null)
+                            new ButtonC("Alphabetical", null, () => sortList(sortType.ALPHABETICAL)),
+                            new ButtonC("Pending", null, () => sortList(sortType.PENDING_ITEMS)),
+                            new ButtonC("High-priority items", null, () => sortList(sortType.HIGH_PRIORITY_ITEMS))
                         ])
                     ]
 
@@ -76,10 +99,20 @@ const Home = _ => {
     useEffect(() => {
         requestAll()
         .then(todoLists => {
+            //Add additional fields to it
+            todoLists.forEach(list => {
+                list.highPriorityCount = 0
+                list.pendingCount = 0
+                list.todo_items.forEach(x => {
+                    if (x.priority === "high") list.highPriorityCount++
+                    if (!x.compeleted) list.pendingCount++
+                }) 
+            })
+            console.log(todoLists)
             setData((prev) => {
                 return {
                     ...prev, userData: {
-                        todoLists: todoLists
+                        todoLists
                     }
                 }
             })

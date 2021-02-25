@@ -57,7 +57,7 @@ const LiList = ({list}) => {
 
     const renameSelf = event => {
         event.stopPropagation()
-        requestUpdate(list._id, list.title)
+        requestUpdate(list._id, state.newTitle)
         .then(response => {
             console.log(response)
             setData((prev) => {

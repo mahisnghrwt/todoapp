@@ -34,7 +34,7 @@ html, #root, body {
 
 .nav {
     background-color: #82ccdd;
-    height: 2rem;
+    height: 1rem;
     display: flex;
     flex-flow: row nowrap;
     padding: 1rem;
