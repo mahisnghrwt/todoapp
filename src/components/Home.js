@@ -1,69 +1,27 @@
-import React, {useEffect, useContext, useState} from 'react'
-import {faFile, faSort, faSave} from '@fortawesome/free-solid-svg-icons'
+import React, {useEffect, useState, useContext} from 'react'
+import {faFile, faSort} from '@fortawesome/free-solid-svg-icons'
 
-import {DataContext} from './Context'
-import {requestAll, requestCreate} from './utility/APICalls'
-
+import {requestAll} from './utility/APICalls'
 import Nav from './Nav'
-import {QuickButtons, ButtonC, Button} from './QuickButtons'
-import UlList from './UlList/UlList'
-
+import {QuickButtons, ButtonC} from './QuickButtons'
+import LiList from './UlList/LiList'
+import CreateListForm from './CreateListForm'
+import {tagLists} from './utility/Utils'
+import {reportType} from './utility/Definations'
+import { AuthContext } from './Context'
 var arraySort = require('array-sort')
 
-const CreateListForm = ({toggleSelf}) => {
-    const [state, setState] = useState({listTitle: ""})
-    const [data, setData] = useContext(DataContext)
-    
-    const createList = event => {
-        requestCreate(state.listTitle)
-        .then(todoLists => {
-            console.log(todoLists)
-            setData((prev) => {
-                return {
-                    ...prev,
-                    userData: {
-                        todoLists: todoLists
-                    }
-                }
-            })
-        })
-        toggleSelf()
-    }
-
-    //Title input field value onChange handler.
-    const titleChanged = event => {
-        setState((prev) => {
-            return {
-                ...prev, listTitle: event.target.value
-            }
-        })
-    }
-
-    const buttonData = new ButtonC("Save", faSave, createList)
-
-    return (
-        <div className="create-list">
-            <div className="form-title">Create a new list</div>
-            <div className="input-group inline">
-                <label>Title</label>
-                <input type="text" value={state.listTitle} onChange={titleChanged} />
-                <Button button={buttonData} />
-            </div>
-        </div>
-    )
-}
-
-const Home = _ => {
-    const [data, setData] = useContext(DataContext)
+const Home = ({global: [global, setGlobal]}) => {
+    const [auth, setAuth] = useContext(AuthContext)
     const [state, setState] = useState({createListFormEnabled: false})
     const sortType = {
         ALPHABETICAL: "title",
         PENDING_ITEMS: "pendingCount",
         HIGH_PRIORITY_ITEMS: "highPriorityCount"
     }
-
+    
     //Event handler for "New" list button
-    const toggleForm = event => {
+    const toggleForm = _ => {
         setState((prev) => {
             return {
                 ...prev, createListFormEnabled: !prev.createListFormEnabled
@@ -71,18 +29,70 @@ const Home = _ => {
         })
     }
 
-    const sortList = param => {
-        var listsCpy = data.userData.todoLists
-        arraySort(listsCpy, param)
-        setData(prev => {
-            return (
-                {
-                    ...prev, userData: {
-                        todoLists: listsCpy
-                    }
-                }
-            )
+    //Always update todoLists using this function only.
+    //It ensures todoLists always are tagged.
+    const tagAndUpdateTodoLists = cb => {
+        setGlobal((prev) => {
+            //If we have callback, process todoLists in it
+            cb(prev.todoLists)
+            //tag lists
+            tagLists(prev.todoLists)
+            //Update it in global
+            return {
+                ...prev, todoLists: prev.todoLists
+            }
         })
+    }
+
+    //Handles subcomponent response received from remote endpoint
+    //for reportT, Refer to reportType
+    //remoteResponse, {status: number, json: Obj}
+    const subComponentReportHandler = (reportT, remoteResponse) => {
+        switch(reportT) {
+            case reportType.CREATE:
+                if (remoteResponse.status != 200) {
+                    //Error occured, do something here.
+                }
+                else {
+                    tagAndUpdateTodoLists(todoLists => todoLists.push(remoteResponse.json))
+                }
+                toggleForm()
+                break
+            case reportType.UPDATE:
+                if (remoteResponse.status != 200) {
+                    //Error occured, do something here.
+                }
+                else {
+                    //remoteResponse.json is the updated list
+                    //Replace the todoList with the updated one in global
+                    tagAndUpdateTodoLists(todoLists => {
+                        var index = todoLists.findIndex(x => x._id == remoteResponse.json._id)
+                        if (index != -1)
+                            todoLists[index] = remoteResponse.json
+                    })
+                }
+                break
+            case reportType.DELETE:
+                if (remoteResponse.status != 200) {
+                    //Error occured, do something here.
+                }
+                else {
+                    //remoteResponse.json._id indicates id of the list to be deleted
+                    tagAndUpdateTodoLists(todoLists => {
+                        const index = todoLists.findIndex(x => x._id === remoteResponse.json.id)
+                        if (index != -1)
+                            todoLists.splice(index, 1)
+                    })
+                }
+                break
+        }
+    }
+
+    //Sort the list, refer to sortType enum for available sorting options
+    const sortList = param => {
+        var todoLists = global.todoLists
+        arraySort(todoLists, param)
+        setGlobal(prev => ({...prev, todoLists}))
     }
 
     //Buttons, we will pass to "QuickButtons" component
@@ -95,28 +105,22 @@ const Home = _ => {
                         ])
                     ]
 
-    //Fetch the user data from backend, and store inside "DataContext"
+    //Fetch and store todoList for the current user
     useEffect(() => {
-        requestAll()
-        .then(todoLists => {
-            //Add additional fields to it
-            todoLists.forEach(list => {
-                list.highPriorityCount = 0
-                list.pendingCount = 0
-                list.todo_items.forEach(x => {
-                    if (x.priority === "high") list.highPriorityCount++
-                    if (!x.compeleted) list.pendingCount++
-                }) 
-            })
-            console.log(todoLists)
-            setData((prev) => {
-                return {
-                    ...prev, userData: {
-                        todoLists
-                    }
+        if (!global.todoLists) {
+            requestAll()
+            .then(response => {
+                if (response.status != 200) { 
+                    //Notify the user about the error
+                    return
                 }
+                return response.json()
             })
-        }) 
+            .then(todoLists => {
+                todoLists = tagLists(todoLists)
+                setGlobal(prev => ({...prev, todoLists}))
+            }) 
+        }
     }, [])
 
     return (
@@ -128,8 +132,12 @@ const Home = _ => {
                 </div>
                 <QuickButtons buttons={buttons}/>
                 <br />
-                {state.createListFormEnabled && <CreateListForm toggleSelf={toggleForm}/>}
-                <UlList />
+                {state.createListFormEnabled && <CreateListForm reportParent={subComponentReportHandler}/>}
+                <div className="ul-list">
+                    {!global.todoLists ? 
+                    <>Please wait while we are loading your data</> : 
+                    global.todoLists.map((list) => <LiList key={list._id} list={list} reportParent={subComponentReportHandler} />)}
+                </div>
             </div>
         </div>
     )

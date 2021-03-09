@@ -1,17 +1,20 @@
 import React, {useContext} from 'react'
 import {GoogleLogin} from 'react-google-login'
-import {DataContext} from './Context'
+import {AuthContext} from './Context'
 import {useHistory} from 'react-router-dom'
 
-const Login = props => {
-    const [data, setData] = useContext(DataContext)
-    let history = useHistory()
+const Login = _ => {
+    const AUTH_ENDPOINT = "http://localhost:5001/api/auth/google"
+    //const [data, setData] = useContext(DataContext)
+    const [auth, setAuth] = useContext(AuthContext)
+
+    const history = useHistory()
     //Verify idToken with the server, login user if green flagged, otherwise throw error
-    const verifyToken = async response => {
-        const res = await fetch("http://localhost:5001/api/auth/google", {
+    const verifyToken = async googleLoginResponse => {
+        const res = await fetch(AUTH_ENDPOINT, {
             method: "POST",
             body: JSON.stringify({
-                idToken: response.tokenId
+                idToken: googleLoginResponse.tokenId
             }),
             headers: {
                 'Access-Control-Allow-Origin':'http://localhost:3000/',
@@ -19,51 +22,51 @@ const Login = props => {
             },
             credentials: 'include'
         })
-        console.log("response status", res.status)
-        if (res.status === 200) {
-            console.log("Authentication suucessful!")
-            setData((prev) => {
+        //If authentication successful, mark user loggedIn in auth
+        if (res.status == 200) {
+            setAuth((prev) => {
                 return {
-                    ...prev, auth: {
-                        loggedIn: true
-                    }
+                    ...prev, loggedIn: true
                 }
             })
-            history.push("/")
+            //Redirect the user to Home
+            var redirectPath = '/'
+            if (history.location && history.location.state && history.location.state.from) {
+                console.log(history.location.state)
+                redirectPath = history.location.state.from
+            }
+            history.push({
+                pathname: redirectPath
+            })
         }
         else {
+            //If authentication fails, notify the user!
+            //!TODO! Create a Notification component 
             console.log("Authentication failed at back-end layer!")
         }
     }
 
-    const onSuccess = async response => {
+    const onSuccess = async googleLoginResponse => {
         //Verify token with the server
-        //If expired ask them to login again, else set user as loggedIn
-        verifyToken(response)
+        verifyToken(googleLoginResponse)
     }
 
-    const onFailure = async response => {
-        console.log("Authentication failed at front-end layer.")
-        console.log(response)
-        setData((prev) => {
+    const onFailure = async _ => {
+        setAuth(prev => {
             return {
-                ...prev, auth: {
-                    loggedIn: false
-                }
+                ...prev, loggedIn: false
             }
         })
     }
     
     return (
         <div className="login">
-            <div className="logo-title">TodoApp</div>
             <GoogleLogin
-                render={ props => (<button onClick={props.onClick} disabled={props.disabled}>Login with Google</button>) }
                 clientId={process.env.REACT_APP_CLIENT_ID}
+                isSignedIn={true}
                 buttonText="Login with Google"
                 onSuccess={onSuccess}
                 onFailure={onFailure}
-                isSignedIn={true}
                 cookiePolicy={'single_host_origin'}
             />
         </div>

@@ -1,37 +1,27 @@
 const ENDPOINT = "http://localhost:5001/api"
-const ENDPOINT_TODOITEM = "http://localhost:5001/api/todoitem"
+const ENDPOINT_TODO = "http://localhost:5001/api/todo"
 
-export const requestDelete = async (id) => {
-    const response = await fetch(ENDPOINT, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({_id: id}),
+export const request = async (id) => {
+    const remoteURL = ENDPOINT + "/" + id
+    console.log(`id: ${remoteURL}`)
+    const response = await fetch(ENDPOINT + "/" + id, {
+        credentials: 'include'
     })
-    if (response.status != 200)
-        console.log("Something went wrong while deleting")
+
     return response.json()
-}
-
-export const requestDeleteMany = async (ids) => {
-    const response = await fetch(ENDPOINT, {
-        method: 'DELETE',
-        headers: {
-            'Access-Control-Allow-Origin':'http://localhost:3000/',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ids: ids})
-    })
-    return response
 }
 
 export const requestAll = async () => {
     const response = await fetch(ENDPOINT, {
+        method: 'GET',
+        headers: {
+            'Access-Control-Allow-Origin': 'http://localhost:3000/',
+            "Content-Type": "application/json"
+        },
         credentials: 'include'
     })
-    return response.json()
+
+    return response
 }
 
 export const requestCreate = async (name) => {
@@ -43,7 +33,7 @@ export const requestCreate = async (name) => {
         body: JSON.stringify({title: name}),
         credentials: 'include'
     })
-    return response.json()
+    return response
 }
 
 export const requestUpdate = async (id, title) => {
@@ -52,26 +42,68 @@ export const requestUpdate = async (id, title) => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({_id: id, title: title}),
+        body: JSON.stringify({id, title}),
         credentials: 'include'
     })
-    if (response.status != 200) console.log("BAD!")
-    return response.json()
+    return response
 }
+
+export const requestDelete = async (id) => {
+    const response = await fetch(ENDPOINT + `/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    return response
+}
+
+// *------------------------------------------------------------------------------*
 
 export const requestTodo = async (id) => {
-    const response = await fetch(ENDPOINT_TODOITEM + "/" + id)
+    const response = await fetch(ENDPOINT_TODO + "/" + id)
     return response.json()
 }
 
-export const requestTodoCreate = async (data) => {
-    const response = await fetch(ENDPOINT_TODOITEM, {
+export const requestTodoCreate = async (todoListId, todo) => {
+    todo.priority = todo.priority.toLowerCase()
+    const response = await fetch(ENDPOINT_TODO, {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({todoListId, todo})
     })
 
+    return response
+}
+
+export const requestTodoUpdate = async (todoListId, todo) => {
+    todo.priority = todo.priority.toLowerCase()
+    const response = await fetch(ENDPOINT_TODO, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({todoListId, todo}),
+        credentials: 'include'
+    })
+    return response
+}
+
+export const requestTodoDelete = async (todo_list_id, todo_id) => {
+    const response = await fetch(ENDPOINT_TODO, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({todo_list_id, todo_id}),
+    })
+    if (response.status != 200) {
+        console.log("Something went wrong while deleting")
+    }
     return response.json()
 }

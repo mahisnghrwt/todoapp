@@ -3,7 +3,8 @@
     --narrow-width: 70%;
     --danger: #e74c3c;
     --warning: #f1c40f;
-    --success: #2ecc71;
+    --success: #27ae60;
+    --standard: #2980b9;
 }
 
 * {
@@ -33,12 +34,16 @@ html, #root, body {
 }
 
 .nav {
-    background-color: #82ccdd;
+    background-color: #2980b9;
     height: 1rem;
     display: flex;
     flex-flow: row nowrap;
     padding: 1rem;
     margin: 0 0 3rem 0;
+}
+
+.nav * {
+    color: white;
 }
 
 .logo {
@@ -111,8 +116,6 @@ button {
     /* border: 1px red solid; */
     padding: 0 0rem;
 }
-
-
 
 .li-list {
     /* border: 1px blue solid; */
@@ -196,15 +199,15 @@ button {
 /* Priorities */
 
 .high-priority {
-    border-left: 4px #e55039 solid;
+    border-left: 4px var(--danger) solid;
 }
 
 .moderate-priority {
-    border-left: 4px #e55039 solid;
+    border-left: 4px var(--warning) solid;
 }
 
 .low-priority {
-    border-left: 4px #e55039 solid;
+    border-left: 4px var(--standard) solid;
 }
 
 /* Todo-form */
