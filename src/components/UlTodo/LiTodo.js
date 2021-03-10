@@ -3,15 +3,12 @@ import {useHistory} from 'react-router-dom'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faClock, faEdit, faTrash} from '@fortawesome/free-solid-svg-icons'
 import { requestTodoUpdate, requestTodoDelete } from '../utility/APICalls'
-import {DataContext} from '../Context'
 
-const LiTodo = ({todoListId, todo, deleteItem}) => {
+const LiTodo = ({todoListId, todo, reportParent}) => {
     const [state, setState] = useState({detailedView: false})
-    const [data, setData] = useContext(DataContext)
     const history = useHistory()
     const msInHours = 3600000
     const liTodoClass = `li-todo ${todo.priority}-priority`
-    console.log(liTodoClass)
 
     var age = (new Date() - new Date(todo.created_at)) / msInHours
     age = age.toFixed(2)
@@ -23,29 +20,12 @@ const LiTodo = ({todoListId, todo, deleteItem}) => {
         age = age.toString() + " hours"
     }
 
-    const toggleDetails = _ => {
+    const toggleDetails = () => {
         setState((prev) => { return {...prev, detailedView: !prev.detailedView} })
     }
 
-    const toggleCompelete = event => {
+    const toggleCompelete = () => {
         requestTodoUpdate(todoListId, todo._id, { compeleted: !todo.compeleted })
-        .then(responseTodoLists => setData((prev) => {
-            return {
-                ...prev, userData: { todoLists: responseTodoLists }
-            }
-        }))
-    }
-
-    const deleteSelf = event => {
-        event.stopPropagation()
-        deleteItem(todo._id)
-
-        
-    }
-
-    const editSelf = event => {
-        event.stopPropagation()
-        history.push({ pathname: "/todo/" + todo._id }, {todoListId: todoListId, todo: todo})
     }
 
     return (
@@ -61,10 +41,10 @@ const LiTodo = ({todoListId, todo, deleteItem}) => {
                         <span className="indicator-count">{age}</span>
                     </div>
                     <span className="indicator">
-                        <FontAwesomeIcon icon={faEdit} onClick={editSelf} />
+                        <FontAwesomeIcon icon={faEdit} onClick={null} />
                     </span>
                     <span className="indicator">
-                        <FontAwesomeIcon icon={faTrash} onClick={deleteSelf} />
+                        <FontAwesomeIcon icon={faTrash} onClick={null} />
                     </span>
                 </span>
             </div>

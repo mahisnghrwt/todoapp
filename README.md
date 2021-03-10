@@ -12,19 +12,13 @@
 - Todo compeleted toggle is not responsive enough
 
 #### Todo
-##### Home("My Lists")
-- [x] Design an inline-form to create new list
-- [x] Add delete functioanlity
-- [x] Add rename functionality
-- [x] Add sorting functionality
+- `/`
+    - [ ] Save soritng preferences in DB
+    - [ ] Whenever `global.todoLists` updates
+        - [ ] Add pending and highPriority count
+        - [ ] Sort
 
-##### List
-- [ ] Fetch data from server
-- [ ] Quick buttons to `create`, `sort` and `toggle all` descriptions
-- [x] Sort by 'age' and 'priority'
-- [x] `onClick` toggle the description of `todo`
-- [x] Calculate Todo 'age'
-- [x] create todo
-- [x] delete todo
-- [x] edit todo
-- [x] toggle check todo
+- `/list`
+    - [ ] Save soritng preferences in DB
+    - [ ] Sorting functionality
+    - [ ] Expand all functionality

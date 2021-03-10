@@ -4,7 +4,7 @@ import { useHistory, useParams } from 'react-router-dom'
 
 import Nav from './Nav'
 import {QuickButtons, ButtonC} from './QuickButtons'
-import {request, requestTodoDelete} from './utility/APICalls'
+import {request, requestTodoCreate, requestTodoUpdate, requestTodoDelete} from './utility/APICalls'
 import {reportType, todoSortType} from './utility/Definations'
 import LiTodo from './UlTodo/LiTodo'
 var arraySort = require('array-sort')
@@ -12,7 +12,7 @@ var arraySort = require('array-sort')
 const List = ({global: [global, setGlobal]}) => {
     const history = useHistory()
     const {id} = useParams()
-    var state = null
+    const [state, setState] = useState(null)
     
     const buttons = [
         new ButtonC("New", faFile, _ => { history.push({pathname: '/todo', search: `?listId=${id}`}) }),
@@ -47,7 +47,15 @@ const List = ({global: [global, setGlobal]}) => {
                     //Error occured, do something here.
                 }
                 else {
-
+                    
+                    setGlobal((prev) => {
+                        var todoListIndex = prev.todoLists.findIndex(x => x._id == id)
+                        var todoItemIndex = prev.todoLists[todoListIndex].todo_items.findIndex(x => x._id == remoteResponse.json._id)
+                        prev.todoLists[todoListIndex].todo_items[todoItemIndex] = {... prev.todoLists[todoListIndex].todo_items[todoItemIndex], ...remoteResponse.json}
+                        return {
+                            ...prev
+                        }
+                    })
                 }
                 break
             case reportType.DELETE:
@@ -58,6 +66,38 @@ const List = ({global: [global, setGlobal]}) => {
 
                 }
                 break
+        }
+    }
+
+    const handleReceivedTodo = todo => {
+        //Update
+        if (todo._id) {
+            requestTodoUpdate(id, todo)
+            .then(response => {
+                if (response.status != 200) {
+                    //throw notification to user
+                    subComponentReportHandler(reportType.UPDATE, {status: response.status})
+                    throw new Error(`Error occured while updating todo.`)
+                }
+                return response.json()
+            })
+            .then(updatedTodo => {
+                subComponentReportHandler(reportType.UPDATE, {status: 200, json: updatedTodo})
+            })
+        }
+        else {
+            //create
+            requestTodoCreate(id, todo)
+            .then(response => {
+                if (response.status != 200) {
+                    subComponentReportHandler(reportType.CREATE, {status: response.status})
+                    throw new Error(`Error occured while creating todo.`)
+                }
+                return response.json()
+            })
+            .then(newTodo => {
+                subComponentReportHandler(reportType.CREATE, {status: 200, json: newTodo})
+            })
         }
     }
 
@@ -81,8 +121,14 @@ const List = ({global: [global, setGlobal]}) => {
             history.push({pathname: '/'})
         }
         else {
-            const index = global.todoLists.findIndex(x => x._id === id) 
-            state = global.todoLists[index]
+            setState(() => global.todoLists.find(x => x._id === id) )
+
+            //If the user is redirected to this page from the /todo, then check for the state received to add or update todo
+            if (history.location.state && history.location.state.todo) {
+                handleReceivedTodo(history.location.state.todo)
+                //clear history.location.state
+                history.replace(`/list/${id}`)
+            }
         }
      }, [])
 
@@ -91,13 +137,14 @@ const List = ({global: [global, setGlobal]}) => {
             <Nav />
             <div className="content">
                 <div className="title">
+                    {state && state.title}
                 </div>
                 <>
                     <QuickButtons buttons={buttons} />
                     <br />
                     {!state ? <p>Please wait while we load your data...</p> :  
                     <div className="ul-list">
-                        {state.todoItems.map((x) => <LiTodo key={x._id} todoListId={state._id} todo={x} reportParent={subComponentReportHandler} />)}
+                        {state.todo_items.map((x) => <LiTodo key={x._id} todoListId={state._id} todo={x} reportParent={subComponentReportHandler} />)}
                     </div>
                     }   
                 </>

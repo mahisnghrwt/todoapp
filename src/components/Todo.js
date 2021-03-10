@@ -3,10 +3,8 @@ import { useHistory } from 'react-router-dom'
 
 import Nav from './Nav'
 import {QuickButtons, ButtonC} from './QuickButtons'
-import { requestTodoCreate, requestTodoUpdate } from './utility/APICalls'
-import {reportType} from './utility/Definations'
 
-const TodoEdit = ({reportParent}) => {
+const TodoEdit = () => {
     //priorities enum
     const priorities = ["Low", "Moderate", "High"]
     const property = {
@@ -14,49 +12,16 @@ const TodoEdit = ({reportParent}) => {
         DESC: 'desc',
         PRIORITY: 'priority'
     }
-
-    const history = useHistory()
     //local state, required for controlled components
     const [state, setState] = useState({
         title: "", desc: "", priority: "low"
     })   
+    const history = useHistory()
     const [todoListId, setTodoListId] = useState(null)
 
     const saveTodo = () => {
-        if (state._id) {
-            //Make an update call here
-            requestTodoUpdate(todoListId, state)
-            .then(response => {
-                if (response.status != 200) {
-                    reportParent(reportType.UPDATE, {status: response.status})
-                    throw new Error('While updating todo, response:', response)
-                }
-                return response.json()
-            })
-            .then(updatedTodo => {
-                reportParent(reportType.UPDATE, {status: 200, json: updatedTodo})
-            })
-            .catch(err => {
-                console.error(err)
-            })
-        }
-        else {
-            //Create call over here
-            requestTodoCreate(todoListId, state)
-            .then(response => {
-                if (response.status != 200) {
-                    reportParent(reportType.CREATE, {status: response.status})
-                    throw new Error('While creating todo, response:', response)
-                }
-                return response.json()
-            })
-            .then(todo => {
-                reportParent(reportType.CREATE, {status: 200, json: todo})
-            })
-            .catch(err => {
-                console.error(err)
-            })
-        }
+        //transfer the todo as state to /list/todoListId
+        history.push(`/list/${todoListId}`, {todo: {...state}})
     }
 
     //Buttons for our form
@@ -75,10 +40,7 @@ const TodoEdit = ({reportParent}) => {
 
     const propertyChanged = (property, event) => {
         setState(prev => {
-            // prev.title = event.target.value
             prev[property] = event.target.value
-            // prev[property] = event.target.value
-            // console.log(prev)
             return {
                 ...prev
             }
