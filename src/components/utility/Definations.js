@@ -11,7 +11,3 @@ export const priority = {
     HIGH: 'high'
 }
 
-export const todoSortType = {
-    AGE: 'created_at',
-    PRIORITY: 'priority'
-}

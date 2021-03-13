@@ -8,16 +8,23 @@ import LiList from './UlList/LiList'
 import CreateListForm from './CreateListForm'
 import {tagLists} from './utility/Utils'
 import {reportType} from './utility/Definations'
-import { AuthContext } from './Context'
 var arraySort = require('array-sort')
 
 const Home = ({global: [global, setGlobal]}) => {
-    const [auth, setAuth] = useContext(AuthContext)
     const [state, setState] = useState({createListFormEnabled: false})
     const sortType = {
-        ALPHABETICAL: "title",
-        PENDING_ITEMS: "pendingCount",
-        HIGH_PRIORITY_ITEMS: "highPriorityCount"
+        ALPHABETICAL: {
+            param: 'title',
+            desc: true
+        },
+        PENDING_ITEMS: {
+            param: 'pendingCount',
+            desc: true
+        },
+        HIGH_PRIORITY_ITEMS: {
+            param: 'highPriorityCount',
+            desc: true
+        } 
     }
     
     //Event handler for "New" list button
@@ -88,10 +95,11 @@ const Home = ({global: [global, setGlobal]}) => {
         }
     }
 
+
     //Sort the list, refer to sortType enum for available sorting options
-    const sortList = param => {
+    const sortList = criteria => {
         var todoLists = global.todoLists
-        arraySort(todoLists, param)
+        arraySort(todoLists, criteria)
         setGlobal(prev => ({...prev, todoLists}))
     }
 
