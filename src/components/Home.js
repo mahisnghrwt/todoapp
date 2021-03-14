@@ -8,24 +8,22 @@ import LiList from './UlList/LiList'
 import CreateListForm from './CreateListForm'
 import {tagLists} from './utility/Utils'
 import {reportType} from './utility/Definations'
-var arraySort = require('array-sort')
+import {requestUpdateListSortingConfig} from './utility/APICalls'
+import {AuthContext} from './Context'
 
 const Home = ({global: [global, setGlobal]}) => {
     const [state, setState] = useState({createListFormEnabled: false})
     const sortType = {
-        ALPHABETICAL: {
-            param: 'title',
-            desc: true
-        },
-        PENDING_ITEMS: {
-            param: 'pendingCount',
-            desc: true
-        },
-        HIGH_PRIORITY_ITEMS: {
-            param: 'highPriorityCount',
-            desc: true
-        } 
+        ALPHABETICAL: 'title',
+        PENDING_ITEMS: 'pendingCount',
+        HIGH_PRIORITY_ITEMS: 'highPriorityCount',
+        CREATED_AT: 'created_at'
     }
+    const sortingOrder = {
+        ASC: 'asc',
+        DESC: 'desc'
+    }
+    const [authContext, setAuthContext] = useContext(AuthContext)
     
     //Event handler for "New" list button
     const toggleForm = _ => {
@@ -38,15 +36,19 @@ const Home = ({global: [global, setGlobal]}) => {
 
     //Always update todoLists using this function only.
     //It ensures todoLists always are tagged.
-    const tagAndUpdateTodoLists = cb => {
+    const tagAndUpdateTodoLists = (cb, todoLists = null) => {
         setGlobal((prev) => {
+            var todoLists_ = todoLists
+            if (todoLists == null)
+                todoLists_ = prev.todoLists
+
             //If we have callback, process todoLists in it
-            cb(prev.todoLists)
+            cb(todoLists_)
             //tag lists
-            tagLists(prev.todoLists)
+            tagLists(todoLists_)
             //Update it in global
             return {
-                ...prev, todoLists: prev.todoLists
+                ...prev, todoLists: todoLists_
             }
         })
     }
@@ -61,7 +63,10 @@ const Home = ({global: [global, setGlobal]}) => {
                     //Error occured, do something here.
                 }
                 else {
-                    tagAndUpdateTodoLists(todoLists => todoLists.push(remoteResponse.json))
+                    tagAndUpdateTodoLists(todoLists => {
+                        todoLists.push(remoteResponse.json)
+                        listSortingCallback(todoLists, authContext.sort)
+                    })
                 }
                 toggleForm()
                 break
@@ -76,6 +81,7 @@ const Home = ({global: [global, setGlobal]}) => {
                         var index = todoLists.findIndex(x => x._id == remoteResponse.json._id)
                         if (index != -1)
                             todoLists[index] = remoteResponse.json
+                        listSortingCallback(todoLists, authContext.sort)
                     })
                 }
                 break
@@ -95,21 +101,63 @@ const Home = ({global: [global, setGlobal]}) => {
         }
     }
 
+    const sortByProperty = (a, b, property) => {
+        if (a[property] == b[property]) return 0
+        if (a[property] > b[property]) return -1
+        return 1
+    }
+
+    const listSortingCallback = (todoLists, criteria) => {
+        const criteria_ = criteria.split('.')
+        if (criteria_[1] === sortingOrder.DESC) {
+            todoLists.sort((a, b) => sortByProperty(a, b, criteria_[0]))
+        }
+        else {
+            todoLists.sort((a, b) => (-1 * sortByProperty(a, b, criteria_[0])))
+        }
+    } 
 
     //Sort the list, refer to sortType enum for available sorting options
-    const sortList = criteria => {
-        var todoLists = global.todoLists
-        arraySort(todoLists, criteria)
-        setGlobal(prev => ({...prev, todoLists}))
+    const sort = criteria => {
+        const prevCriteria = authContext.sort.split('.')
+        if (criteria === prevCriteria[0]) {
+            //Opposite sorting order
+            if (prevCriteria[1] === 'desc') {
+                criteria += '.asc'
+            }
+            else {
+                criteria += '.desc'
+            }
+        } else {
+            //Otherwise default desc order
+            criteria += '.desc'
+        }
+
+        requestUpdateListSortingConfig(criteria)
+        .then(response => {
+            if (response.status != 200) {
+                //throw error over here
+            }
+            else {
+                setAuthContext(prev => {
+                    return {
+                        ...prev, sort: criteria
+                    }
+                })
+
+                tagAndUpdateTodoLists(todoLists => listSortingCallback(todoLists, criteria))
+            }
+        })
     }
 
     //Buttons, we will pass to "QuickButtons" component
     const buttons = [
                         new ButtonC("New", faFile, toggleForm),
                         new ButtonC("Sort", faSort, null, [
-                            new ButtonC("Alphabetical", null, () => sortList(sortType.ALPHABETICAL)),
-                            new ButtonC("Pending", null, () => sortList(sortType.PENDING_ITEMS)),
-                            new ButtonC("High-priority items", null, () => sortList(sortType.HIGH_PRIORITY_ITEMS))
+                            new ButtonC("Alphabetical", null, () => sort(sortType.ALPHABETICAL)),
+                            new ButtonC("Pending items", null, () => sort(sortType.PENDING_ITEMS)),
+                            new ButtonC("High-priority items", null, () => sort(sortType.HIGH_PRIORITY_ITEMS)),
+                            new ButtonC("Date created", null, () => sort(sortType.CREATED_AT))
                         ])
                     ]
 
@@ -125,8 +173,12 @@ const Home = ({global: [global, setGlobal]}) => {
                 return response.json()
             })
             .then(todoLists => {
-                todoLists = tagLists(todoLists)
-                setGlobal(prev => ({...prev, todoLists}))
+                
+                console.log(authContext)
+
+                //arrange the item as per the user sorting preference
+                //Then save it in global
+                tagAndUpdateTodoLists(todoLists => listSortingCallback(todoLists, authContext.sort), todoLists)
             }) 
         }
     }, [])

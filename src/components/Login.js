@@ -24,9 +24,10 @@ const Login = _ => {
         })
         //If authentication successful, mark user loggedIn in auth
         if (res.status == 200) {
+            const userConfig = await res.json()
             setAuth((prev) => {
                 return {
-                    ...prev, loggedIn: true
+                    ...prev, ...userConfig, loggedIn: true
                 }
             })
             //Redirect the user to Home

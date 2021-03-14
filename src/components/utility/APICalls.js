@@ -1,27 +1,25 @@
 const ENDPOINT = "http://localhost:5001/api"
 const ENDPOINT_TODO = "http://localhost:5001/api/todo"
 const endpoint = {
+    USER: "http://localhost:5001/api/user",
     LIST: 'http://localhost:5001/api/list',
     TODO: "http://localhost:5001/api/todo"
 }
 
-export const updateListSortingConfig = async (id, preference) => {
-    const response = await fetch(endpoint.LIST, {
-        method: 'POST',
+export const requestUpdateListSortingConfig = async (sort) => {
+    const response = await fetch(endpoint.USER, {
+        method: 'PUT',
         headers: {
             'Access-Control-Allow-Origin': 'http://localhost:3000/',
             "Content-Type": "application/json"
         },
         credentials: 'include',
-        body: {
-            _id: id, preference
-        }
+        body: JSON.stringify({
+            sort
+        })
     })
     return response
 }
-
-
-// ======================================================================
 
 export const request = async (id) => {
     const remoteURL = ENDPOINT + "/" + id

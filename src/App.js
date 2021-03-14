@@ -6,6 +6,7 @@ import {AuthContext} from './components/Context'
 
 import ProtectedRoute from './components/ProtectedRoute'
 import Login from './components/Login'
+import Logout from './components/Logout'
 import Home from './components/Home'
 import List from './components/List'
 import Todo from './components/Todo'
@@ -31,9 +32,9 @@ const App = _ => {
                 <ProtectedRoute exact path='/todo'>
                   <Todo />
                 </ProtectedRoute>
-                {/* <Route exact path = "/list/:id" component={List} />
-                <Route exact path = "/todo" component={Todo} />
-                <Route exact path = "/todo/:id" component={Todo} /> */}
+                <ProtectedRoute exact path='/logout'>
+                  <Logout />
+                </ProtectedRoute>
               </Switch>
             </BrowserRouter>
           </AuthContext.Provider>
