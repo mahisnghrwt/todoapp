@@ -1,15 +1,19 @@
 import React, {useState} from 'react'
 import {faSave} from '@fortawesome/free-solid-svg-icons'
-
 import {requestCreate} from './utility/APICalls'
 import {reportType} from './utility/Definations'
 import {ButtonC, Button} from './QuickButtons'
+import {isAlphaNumeric} from './utility/Utils'
 
 //reportParent => check out the func defination
 const CreateListForm = ({reportParent}) => {
     const [state, setState] = useState({title: ""})
     
-    const createList = _ => {
+    const createList = () => {
+        if (!isAlphaNumeric(state.title)) {
+            //Notify the user!
+            return
+        }
         requestCreate(state.title)
         .then(response => {
             if (response.status != 200) {

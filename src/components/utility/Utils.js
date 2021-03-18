@@ -10,3 +10,14 @@ export const tagLists = lists => {
     })
     return lists
 }
+
+export const isAlphaNumeric = str => {
+    if (!str.match(/^[a-z0-9]+$/i)) {
+        return false
+    }
+    return true
+}
+
+export const sortTodos = criteria => {
+    
+}

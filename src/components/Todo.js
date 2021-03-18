@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
-
 import Nav from './Nav'
 import {QuickButtons, ButtonC} from './QuickButtons'
 
@@ -52,7 +51,7 @@ const TodoEdit = () => {
             <Nav />
             <div className="content">
                 <div className="title">
-                    &lt;todo-title&gt;
+                    {state.title}
                 </div>
                 <br />
                 <div className="todo-form">

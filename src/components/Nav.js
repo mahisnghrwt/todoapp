@@ -19,7 +19,7 @@ const Nav = () => {
     return (
         <div className="nav">
             <span className="logo" onClick={() => history.push('/')}>
-                TODOAPP
+                todoapp
             </span>
             {authContext.loggedIn && 
                 <span className="settings">

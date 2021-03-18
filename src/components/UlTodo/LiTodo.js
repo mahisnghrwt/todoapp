@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, {useState} from 'react'
 import {useHistory} from 'react-router-dom'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faClock, faEdit, faTrash} from '@fortawesome/free-solid-svg-icons'
@@ -12,12 +12,13 @@ const LiTodo = ({todoListId, todo, reportParent}) => {
     const liTodoClass = `li-todo ${todo.priority}-priority`
 
     var age = (new Date() - new Date(todo.created_at)) / msInHours
-    age = age.toFixed(2)
     if (age > 24 ) { 
         age /= 24
+        age = age.toFixed(2)
         age = age.toString() + " days"
     }
     else {
+        age = age.toFixed(2)
         age = age.toString() + " hours"
     }
 

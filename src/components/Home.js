@@ -1,6 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react'
 import {faFile, faSort} from '@fortawesome/free-solid-svg-icons'
-
 import {requestAll} from './utility/APICalls'
 import Nav from './Nav'
 import {QuickButtons, ButtonC} from './QuickButtons'
@@ -10,6 +9,7 @@ import {tagLists} from './utility/Utils'
 import {reportType} from './utility/Definations'
 import {requestUpdateListSortingConfig} from './utility/APICalls'
 import {AuthContext} from './Context'
+import Notification from './Notification'
 
 const Home = ({global: [global, setGlobal]}) => {
     const [state, setState] = useState({createListFormEnabled: false})
@@ -36,16 +36,24 @@ const Home = ({global: [global, setGlobal]}) => {
 
     //Always update todoLists using this function only.
     //It ensures todoLists always are tagged.
-    const tagAndUpdateTodoLists = (cb, todoLists = null) => {
+    const tagAndUpdateTodoLists = (cb, todoLists = null, makeDeepCopy = false) => {
         setGlobal((prev) => {
-            var todoLists_ = todoLists
-            if (todoLists == null)
-                todoLists_ = prev.todoLists
+            var temp = todoLists
+            if (!temp)
+                temp = prev.todoLists
+
+            var todoLists_ = null
+            if (makeDeepCopy)
+                todoLists_ = JSON.parse(JSON.stringify(temp))
+            else
+                todoLists_ = temp
+
+            //tag lists
+            tagLists(todoLists_)
 
             //If we have callback, process todoLists in it
             cb(todoLists_)
-            //tag lists
-            tagLists(todoLists_)
+            
             //Update it in global
             return {
                 ...prev, todoLists: todoLists_
@@ -101,12 +109,14 @@ const Home = ({global: [global, setGlobal]}) => {
         }
     }
 
+    //Just a wrapper function to compare todoLists based on the specified properpty
     const sortByProperty = (a, b, property) => {
-        if (a[property] == b[property]) return 0
+        if (a[property] === b[property]) return 0
         if (a[property] > b[property]) return -1
         return 1
     }
 
+    //Sorts the todoLists based on the sorting preference 'criteria'
     const listSortingCallback = (todoLists, criteria) => {
         const criteria_ = criteria.split('.')
         if (criteria_[1] === sortingOrder.DESC) {
@@ -122,15 +132,15 @@ const Home = ({global: [global, setGlobal]}) => {
         const prevCriteria = authContext.sort.split('.')
         if (criteria === prevCriteria[0]) {
             //Opposite sorting order
-            if (prevCriteria[1] === 'desc') {
-                criteria += '.asc'
+            if (prevCriteria[1] === sortingOrder.DESC) {
+                criteria += `.${sortingOrder.ASC}`
             }
             else {
-                criteria += '.desc'
+                criteria += `.${sortingOrder.DESC}`
             }
         } else {
             //Otherwise default desc order
-            criteria += '.desc'
+            criteria += `.${sortingOrder.DESC}`
         }
 
         requestUpdateListSortingConfig(criteria)
@@ -173,11 +183,7 @@ const Home = ({global: [global, setGlobal]}) => {
                 return response.json()
             })
             .then(todoLists => {
-                
-                console.log(authContext)
-
-                //arrange the item as per the user sorting preference
-                //Then save it in global
+                //take the todoLists received in response, sort it out and then save it in global state
                 tagAndUpdateTodoLists(todoLists => listSortingCallback(todoLists, authContext.sort), todoLists)
             }) 
         }
@@ -185,6 +191,7 @@ const Home = ({global: [global, setGlobal]}) => {
 
     return (
         <div className="home">
+            {/* <Notification message={'small msg!'} /> */}
             <Nav />
             <div className="content">
                 <div className="title">

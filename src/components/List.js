@@ -1,13 +1,13 @@
 import { faClock, faExpandAlt, faFile, faSort, faHandRock } from '@fortawesome/free-solid-svg-icons'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
-
 import Nav from './Nav'
 import {QuickButtons, ButtonC} from './QuickButtons'
-import {request, requestTodoCreate, requestTodoUpdate, requestUpdateSortingConfig} from './utility/APICalls'
+import {requestTodoCreate, requestTodoUpdate, requestUpdateSortingConfig} from './utility/APICalls'
 import {reportType} from './utility/Definations'
 import LiTodo from './UlTodo/LiTodo'
 import {tagLists} from './utility/Utils'
+import Notification from './Notification'
 
 const todoSortType = {
     AGE: 'created_at',
@@ -17,6 +17,10 @@ const todoSortType = {
 const List = ({global: [global, setGlobal]}) => {
     const history = useHistory()
     const {id} = useParams()
+    var mounted = useRef(true)
+
+    //TRUE ~ some async operation underway
+    const [loading, setLoading] = useState(false)
 
     //Grab the latest state for this list from global
     //We are mantaining single source of truth, state refers to global.todoLists
@@ -37,15 +41,21 @@ const List = ({global: [global, setGlobal]}) => {
 
     //Always update todoLists using this function only.
     //It ensures todoLists always are tagged.
-    const tagAndUpdateTodoLists = cb => {
+    const tagAndUpdateTodoLists = (cb, todoList = null) => {
+        if (!mounted.current) return null
         setGlobal((prev) => {
             //If we have callback, process todoLists in it
-            cb(prev.todoLists)
+            var dc = todoList
+            if (dc == null) {
+                dc = JSON.parse(JSON.stringify(prev.todoLists))
+            }
+            //call the passed callback on the todoList
+            cb(dc)
             //tag lists
-            tagLists(prev.todoLists)
+            tagLists(dc)
             //Update it in global
             return {
-                ...prev, todoLists: prev.todoLists
+                ...prev, todoLists: dc
             }
         })
     }
@@ -88,6 +98,7 @@ const List = ({global: [global, setGlobal]}) => {
                     const deleteTodoCallback = (todoLists) => {
                         var todoListIndex = todoLists.findIndex(x => x._id == id)
                         var todoItemIndex = todoLists[todoListIndex].todo_items.findIndex(x => x._id == remoteResponse.json._id)
+                        console.log(todoListIndex)
                         todoLists[todoListIndex].todo_items.splice(todoItemIndex, 1)
                     }
                     tagAndUpdateTodoLists(deleteTodoCallback)
@@ -96,8 +107,9 @@ const List = ({global: [global, setGlobal]}) => {
         }
     }
 
-    const handleReceivedTodo = todo => {
-        //Update
+    //Request server to create/update todo
+    const processTodo = todo => {
+        //If the todo has '_id' property, it indicates that it already exists and its an update call, else create new one.
         if (todo._id) {
             requestTodoUpdate(id, todo)
             .then(response => {
@@ -128,8 +140,13 @@ const List = ({global: [global, setGlobal]}) => {
         }
     }
 
-    const sort = (criteria) => {
+    //If criteria is passed as a parameter, it compares with the previous criteria, and appends the sorting order('asc' or 'desc')
+    //keyword accordingly.
+    //Else, returns the current criteria.
+    const generateCriteria = (criteria = null) => {
+        if (criteria == null) return state.sort
         const prevCriteria = state.sort.split('.')
+
         if (criteria === prevCriteria[0]) {
             //Opposite sorting order
             if (prevCriteria[1] === 'desc') {
@@ -143,38 +160,45 @@ const List = ({global: [global, setGlobal]}) => {
             criteria += '.desc'
         }
 
+        return criteria
+    }
+
+    const sortTodosCallback = (todoLists, criteria) => {
+        var i = todoLists.findIndex(x => x._id == state._id)
+        //Sort the todo_items inplace according to the todoList.sort
+        //Right now we are only sorting if the criteria is 'priorirty'
+        const criteria_ = criteria.split('.')
+        if (criteria_[0] === todoSortType.PRIORITY) {
+            if (criteria_[1] === 'asc') {
+                todoLists[i].todo_items.sort(priorityCompare)
+            }
+            else {
+                todoLists[i].todo_items.sort((a, b) => (-1 * priorityCompare(a, b)))
+            }
+        }
+        else if (criteria_[0] === todoSortType.AGE) {
+            if (criteria_[1] === 'asc') {
+                todoLists[i].todo_items.sort(createdAtCompare)
+            }
+            else {
+                todoLists[i].todo_items.sort((a, b) => (-1 * createdAtCompare(a, b)))
+            }
+        }
+        todoLists[i] = {
+            ...todoLists[i], sort: criteria
+        }
+    }
+
+    const sort = (criteria) => {
+        criteria = generateCriteria(criteria)
         requestUpdateSortingConfig(state._id, criteria)
         .then(response => {
             if (response.status != 200) {
                 //throw err
             }
             else {
-                const updateSortingConfigCallback = todoLists => {
-                    var i = todoLists.findIndex(x => x._id == state._id)
-                    //Sort the todo_items inplace according to the todoList.sort
-                    //Right now we are only sorting if the criteria is 'priorirty'
-                    const criteria_ = criteria.split('.')
-                    if (criteria_[0] === todoSortType.PRIORITY) {
-                        if (criteria_[1] === 'asc') {
-                            todoLists[i].todo_items.sort(priorityCompare)
-                        }
-                        else {
-                            todoLists[i].todo_items.sort((a, b) => (-1 * priorityCompare(a, b)))
-                        }
-                    }
-                    else if (criteria_[0] === todoSortType.AGE) {
-                        if (criteria_[1] === 'asc') {
-                            todoLists[i].todo_items.sort(createdAtCompare)
-                        }
-                        else {
-                            todoLists[i].todo_items.sort((a, b) => (-1 * createdAtCompare(a, b)))
-                        }
-                    }
-                    todoLists[i] = {
-                        ...todoLists[i], sort: criteria
-                    }
-                }
-                tagAndUpdateTodoLists(updateSortingConfigCallback)
+                
+                tagAndUpdateTodoLists((todoLists) => sortTodosCallback(todoLists, criteria))
             }
         })
     }
@@ -195,28 +219,41 @@ const List = ({global: [global, setGlobal]}) => {
         return 1
     }
 
-     useEffect(() => {
-         if (!global.todoLists)
-            return history.push({pathname: '/'})
+    useEffect(() => {
+        if (!global.todoLists)
+            return history.push({
+                pathname: '/'
+            })
         //In case we do not have list id passed in as url params, redirect user back to the Home page
         if (!id) {
-            history.push({pathname: '/'})
-        }
-        else {
+            history.push({
+                pathname: '/'
+            })
+        } else {
+            //Just checks whether we have any todoList referring to the id provided
             var ind = global.todoLists.findIndex(x => x._id === id)
             if (ind === -1)
-                history.push({pathname: '/'})
+                history.push({
+                    pathname: '/'
+                })
+
             //If the user is redirected to this page from the /todo, then check for the state received to add or update todo
             if (history.location.state && history.location.state.todo) {
-                handleReceivedTodo(history.location.state.todo)
+                processTodo(history.location.state.todo)
                 //clear history.location.state
                 history.replace(`/list/${id}`)
             }
         }
-     }, [])
+
+        tagAndUpdateTodoLists((todoLists) => sortTodosCallback(todoLists, state.sort))
+        return () => {
+            mounted.current = false
+        }
+    }, [])
     
     return (
         <div className="home">
+            {loading && <Notification message={'Saving changes please wait...'} />}
             <Nav />
             <div className="content">
                 <div className="title">
