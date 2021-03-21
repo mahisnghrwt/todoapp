@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext} from 'react'
+import React, {useEffect, useState, useContext, useRef} from 'react'
 import {faFile, faSort} from '@fortawesome/free-solid-svg-icons'
 import {requestAll} from './utility/APICalls'
 import Nav from './Nav'
@@ -13,6 +13,7 @@ import Notification from './Notification'
 
 const Home = ({global: [global, setGlobal]}) => {
     const [state, setState] = useState({createListFormEnabled: false})
+    const mounted = useRef(true)
     const sortType = {
         ALPHABETICAL: 'title',
         PENDING_ITEMS: 'pendingCount',
@@ -37,6 +38,7 @@ const Home = ({global: [global, setGlobal]}) => {
     //Always update todoLists using this function only.
     //It ensures todoLists always are tagged.
     const tagAndUpdateTodoLists = (cb, todoLists = null, makeDeepCopy = false) => {
+        if (!mounted.current) return null
         setGlobal((prev) => {
             var temp = todoLists
             if (!temp)
@@ -187,6 +189,12 @@ const Home = ({global: [global, setGlobal]}) => {
                 tagAndUpdateTodoLists(todoLists => listSortingCallback(todoLists, authContext.sort), todoLists)
             }) 
         }
+        else {
+            var todoLists = global.todoLists
+            tagAndUpdateTodoLists(todoLists => listSortingCallback(todoLists, authContext.sort), todoLists)
+        }
+
+        return () => mounted.current = false
     }, [])
 
     return (

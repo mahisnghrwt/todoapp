@@ -35,6 +35,7 @@ const Login = _ => {
             if (history.location && history.location.state && history.location.state.from) {
                 console.log(history.location.state)
                 redirectPath = history.location.state.from
+                history.replace('/login', null)
             }
             history.push({
                 pathname: redirectPath

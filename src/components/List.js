@@ -220,10 +220,11 @@ const List = ({global: [global, setGlobal]}) => {
     }
 
     useEffect(() => {
-        if (!global.todoLists)
+        if (!global.todoLists) {
             return history.push({
                 pathname: '/'
             })
+        }
         //In case we do not have list id passed in as url params, redirect user back to the Home page
         if (!id) {
             history.push({
@@ -262,7 +263,7 @@ const List = ({global: [global, setGlobal]}) => {
                 <>
                     <QuickButtons buttons={buttons} />
                     <br />
-                    {!state ? <p>Please wait while we load your data...</p> :  
+                    {!state ? <p>Please wait while we load your data...</p> : 
                     <div className="ul-list">
                         {state.todo_items.map((x) => <LiTodo key={x._id} todoListId={state._id} todo={x} reportParent={subComponentReportHandler} />)}
                     </div>

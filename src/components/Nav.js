@@ -2,6 +2,8 @@ import React, {useContext} from 'react'
 import {useHistory} from 'react-router-dom'
 import {AuthContext} from './Context'
 import { GoogleLogout } from 'react-google-login';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faSignOutAlt} from '@fortawesome/free-solid-svg-icons'
 
 const Nav = () => {
     const history = useHistory()
@@ -25,7 +27,7 @@ const Nav = () => {
                 <span className="settings">
                     <GoogleLogout
                         clientId={process.env.REACT_APP_CLIENT_ID}
-                        buttonText="Logout"
+                        render={renderProps => <button className='logout-button' onClick={renderProps.onClick} disabled={renderProps.disabled}>Logout <FontAwesomeIcon icon={faSignOutAlt} /></button>}
                         onLogoutSuccess={logout}
                     />
                 </span>

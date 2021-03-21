@@ -2,19 +2,30 @@ import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import Nav from './Nav'
 import {QuickButtons, ButtonC} from './QuickButtons'
+import {isAlphaNumeric, isString} from './utility/Utils'
 
 const TodoEdit = () => {
     //priorities enum
     const priorities = ["Low", "Moderate", "High"]
     const property = {
-        TITLE: 'title',
-        DESC: 'desc',
-        PRIORITY: 'priority'
+        TITLE: {
+            name: 'title',
+            maxLength: 15
+        },
+        DESC: {
+            name: 'desc',
+            maxLength: 100
+        },
+        PRIORITY: {
+            name: 'priority',
+            maxLength: null
+        }
     }
     //local state, required for controlled components
     const [state, setState] = useState({
         title: "", desc: "", priority: "low"
     })   
+    const [error, setError] = useState({title: '', desc: '', priority: ''})
     const history = useHistory()
     const [todoListId, setTodoListId] = useState(null)
 
@@ -37,9 +48,35 @@ const TodoEdit = () => {
         }
     }, [])
 
-    const propertyChanged = (property, event) => {
+    const propertyChanged = (property_, event) => {
+        if (property_.maxLength != null && event.target.value.length > property_.maxLength) {      
+            setError(prev => {
+                prev[property_.name] = `Exceeding max character limit of ${property_.maxLength}!`
+                return {
+                    ...prev
+                }
+            })
+            return null
+        }
+        
+        if (!isAlphaNumeric(event.target.value)) {
+            setError(prev => {
+                prev[property_.name] = `Only alphanumeric values accepted!`
+                return {
+                    ...prev
+                }
+            })
+            return null
+        }
+
+        setError(prev => {
+            prev[property_.name] = ''
+            return {
+                ...prev
+            }
+        })
         setState(prev => {
-            prev[property] = event.target.value
+            prev[property_.name] = event.target.value
             return {
                 ...prev
             }
@@ -59,6 +96,7 @@ const TodoEdit = () => {
                         <div className="input-group">
                             <label>Title</label>
                             <input type="text" value={state.title} onChange={(event) => propertyChanged(property.TITLE, event)} />
+                            <span className='input-error'>{error.title}</span>
                         </div>
                         <div className="input-group">
                             <label>Priority</label>
@@ -74,6 +112,7 @@ const TodoEdit = () => {
                     <div className="input-group">
                         <label>Desc</label>
                         <textarea onChange={(event) => propertyChanged(property.DESC, event)} value={state.desc} />
+                        <span className='input-error'>{error.desc}</span>
                     </div>
                     <QuickButtons buttons={buttons} />
                 </div>

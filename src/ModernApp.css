@@ -322,3 +322,17 @@ input[type=text], select, textarea, option {
     display: flex;
     align-items: center;
 }
+
+.input-error {
+    color: var(--danger-2);
+    background-color: #ecf0f1;
+    font-size: 0.75rem;
+    margin: 0.25rem 0rem;
+    width: fit-content;
+}
+
+.logout-button {
+    background-color: var(--danger);
+    font-size: 1rem;
+    color: white;
+}
