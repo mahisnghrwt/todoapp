@@ -1,11 +1,12 @@
+``
   __            __       _______             
  |  |_.-----.--|  .-----|   _   .-----.-----.
  |   _|  _  |  _  |  _  |.  1   |  _  |  _  |
  |____|_____|_____|_____|.  _   |   __|   __|
                         |:  |   |__|  |__|   
                         |::.|:. |            
-                        `--- ---'            
-                                             
+                        `--- ---'
+``                                           
 
 ### Development
 #### Upcoming features / Concepts
@@ -22,7 +23,6 @@
 
 #### Todo
 - ~~Before unmounting the component check for uncomplete any pending asynchronus tasks.~~
-- 
 - ~~Validate all user inputs~~
 - ~~Fix Navbar~~
 - Can't go back to `/todo`
