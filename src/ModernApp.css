@@ -140,6 +140,7 @@ button {
     padding: 0.5rem .5rem;
     display: flex;
     flex-direction: column;
+
 }
 
 .li-todo * {
@@ -151,13 +152,26 @@ button {
     padding: 0;
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
+
 
 .li-todo-basic input[type=checkbox] {
     margin: 0 .25rem;
 }
 
 .li-todo-right, .li-list-right {
+    width: fit-content;
+    margin: 0;
+    padding: 0;
+    /* margin-left: auto;
+    margin-right: 1rem; */
+    display: flex;
+    flex-direction: row;
+}
+
+.li-list-right {
     width: fit-content;
     margin: 0;
     padding: 0;
@@ -192,7 +206,11 @@ button {
 /* Utility */
 
 .success {
-    background-color: #00b894;
+    background-color: var(--success);
+}
+
+.danger {
+    background-color: var(--danger);
 }
 
 .warning-text {
@@ -200,7 +218,11 @@ button {
 }
 
 .danger-text {
-    color: var(--danger)
+    color: var(--danger-2)
+}
+
+.success-text {
+    color: var(--success-2)
 }
 
 /* Priorities */
@@ -335,4 +357,25 @@ input[type=text], select, textarea, option {
     background-color: var(--danger);
     font-size: 1rem;
     color: white;
+}
+
+.recurring-todo-status {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: fit-content;
+}
+
+.recurring-todo-status * {
+    /* color: var(--success-2); */
+    font-size: 1rem;
+    margin: 0 .1rem;
+}
+
+.recurring-todo-button {
+    color: white;
+}
+
+.li-todo-title {
+    font-weight: 500;
 }

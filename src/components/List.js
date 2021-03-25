@@ -6,7 +6,6 @@ import {QuickButtons, ButtonC} from './QuickButtons'
 import {requestTodoCreate, requestTodoUpdate, requestUpdateSortingConfig} from './utility/APICalls'
 import {reportType} from './utility/Definations'
 import LiTodo from './UlTodo/LiTodo'
-import {tagLists} from './utility/Utils'
 import Notification from './Notification'
 
 const todoSortType = {
@@ -14,13 +13,12 @@ const todoSortType = {
     PRIORITY: 'priority'
 }
 
-const List = ({global: [global, setGlobal]}) => {
+const List = ({global: [global, setGlobal__]}) => {
     const history = useHistory()
     const {id} = useParams()
     var mounted = useRef(true)
-
-    //TRUE ~ some async operation underway
-    const [loading, setLoading] = useState(false)
+    const [error, setError_] = useState('')
+    const errorTimeout = 10000 //10 seconds
 
     //Grab the latest state for this list from global
     //We are mantaining single source of truth, state refers to global.todoLists
@@ -39,70 +37,47 @@ const List = ({global: [global, setGlobal]}) => {
         new ButtonC("Expand all", faExpandAlt, null)
     ]
 
-    //Always update todoLists using this function only.
-    //It ensures todoLists always are tagged.
-    const tagAndUpdateTodoLists = (cb, todoList = null) => {
-        if (!mounted.current) return null
-        setGlobal((prev) => {
-            //If we have callback, process todoLists in it
-            var dc = todoList
-            if (dc == null) {
-                dc = JSON.parse(JSON.stringify(prev.todoLists))
-            }
-            //call the passed callback on the todoList
-            cb(dc)
-            //tag lists
-            tagLists(dc)
-            //Update it in global
-            return {
-                ...prev, todoLists: dc
-            }
-        })
+    const setGlobal = (cb, todoLists = null, makeDeepCopy = false) => {
+        if (mounted.current)
+            setGlobal__(cb, todoLists, makeDeepCopy)
+    }
+
+    const setError = err => {
+        if (mounted.current)
+            setError_(() => err)
     }
 
     //Handles subcomponent response received from remote endpoint
     //for reportT, Refer to reportType
     //remoteResponse, {status: number, json: Obj}
     const subComponentReportHandler = (reportT, remoteResponse) => {
+        if (remoteResponse.status != 200) {
+            setError(`status code: ${remoteResponse.status}, error: ${remoteResponse.error}`)
+            return
+        }
         switch(reportT) {
             case reportType.CREATE:
-                if (remoteResponse.status != 200) {
-                    //Error occured, do something here.
+                const createTodoCallback = (todoLists) => {
+                    var todoList = todoLists.find(x => x._id == id)
+                    todoList.todo_items.push(remoteResponse.json)
                 }
-                else {
-                    const createTodoCallback = (todoLists) => {
-                        var todoList = todoLists.find(x => x._id == id)
-                        todoList.todo_items.push(remoteResponse.json)
-                    }
-                    tagAndUpdateTodoLists(createTodoCallback)
-                }
+                setGlobal(createTodoCallback, null, true)
                 break
             case reportType.UPDATE:
-                if (remoteResponse.status != 200) {
-                    //Error occured, do something here.
+                const updateTodoCallback = (todoLists) => {
+                    var todoListIndex = todoLists.findIndex(x => x._id == id)
+                    var todoItemIndex = todoLists[todoListIndex].todo_items.findIndex(x => x._id == remoteResponse.json._id)
+                    todoLists[todoListIndex].todo_items[todoItemIndex] = {... todoLists[todoListIndex].todo_items[todoItemIndex], ...remoteResponse.json}
                 }
-                else {
-                    const updateTodoCallback = (todoLists) => {
-                        var todoListIndex = todoLists.findIndex(x => x._id == id)
-                        var todoItemIndex = todoLists[todoListIndex].todo_items.findIndex(x => x._id == remoteResponse.json._id)
-                        todoLists[todoListIndex].todo_items[todoItemIndex] = {... todoLists[todoListIndex].todo_items[todoItemIndex], ...remoteResponse.json}
-                    }
-                    tagAndUpdateTodoLists(updateTodoCallback)
-                }
+                setGlobal(updateTodoCallback, null, true)
                 break
             case reportType.DELETE:
-                if (remoteResponse.status != 200) {
-                    //Error occured, do something here.
+                const deleteTodoCallback = (todoLists) => {
+                    var todoListIndex = todoLists.findIndex(x => x._id == id)
+                    var todoItemIndex = todoLists[todoListIndex].todo_items.findIndex(x => x._id == remoteResponse.json._id)
+                    todoLists[todoListIndex].todo_items.splice(todoItemIndex, 1)
                 }
-                else {
-                    const deleteTodoCallback = (todoLists) => {
-                        var todoListIndex = todoLists.findIndex(x => x._id == id)
-                        var todoItemIndex = todoLists[todoListIndex].todo_items.findIndex(x => x._id == remoteResponse.json._id)
-                        console.log(todoListIndex)
-                        todoLists[todoListIndex].todo_items.splice(todoItemIndex, 1)
-                    }
-                    tagAndUpdateTodoLists(deleteTodoCallback)
-                }
+                setGlobal(deleteTodoCallback, null, true)
                 break
         }
     }
@@ -123,6 +98,9 @@ const List = ({global: [global, setGlobal]}) => {
             .then(updatedTodo => {
                 subComponentReportHandler(reportType.UPDATE, {status: 200, json: updatedTodo})
             })
+            .catch(err => {
+                setError(err)
+            })
         }
         else {
             //create
@@ -136,6 +114,9 @@ const List = ({global: [global, setGlobal]}) => {
             })
             .then(newTodo => {
                 subComponentReportHandler(reportType.CREATE, {status: 200, json: newTodo})
+            })
+            .catch(err => {
+                setError(err)
             })
         }
     }
@@ -194,11 +175,10 @@ const List = ({global: [global, setGlobal]}) => {
         requestUpdateSortingConfig(state._id, criteria)
         .then(response => {
             if (response.status != 200) {
-                //throw err
+                setError(`status code: ${response.status}, error: ${response.error}`)
             }
             else {
-                
-                tagAndUpdateTodoLists((todoLists) => sortTodosCallback(todoLists, criteria))
+                setGlobal((todoLists) => sortTodosCallback(todoLists, criteria), null, false)
             }
         })
     }
@@ -220,41 +200,41 @@ const List = ({global: [global, setGlobal]}) => {
     }
 
     useEffect(() => {
-        if (!global.todoLists) {
-            return history.push({
-                pathname: '/'
-            })
-        }
+        //Mark the component as unmounted
+        return () => mounted.current = false
+    }, [])
+
+    useEffect(() => {
         //In case we do not have list id passed in as url params, redirect user back to the Home page
         if (!id) {
             history.push({
                 pathname: '/'
             })
-        } else {
-            //Just checks whether we have any todoList referring to the id provided
-            var ind = global.todoLists.findIndex(x => x._id === id)
-            if (ind === -1)
-                history.push({
-                    pathname: '/'
-                })
-
-            //If the user is redirected to this page from the /todo, then check for the state received to add or update todo
-            if (history.location.state && history.location.state.todo) {
-                processTodo(history.location.state.todo)
-                //clear history.location.state
-                history.replace(`/list/${id}`)
-            }
         }
 
-        tagAndUpdateTodoLists((todoLists) => sortTodosCallback(todoLists, state.sort))
-        return () => {
-            mounted.current = false
+        if (!global.todoLists) return
+
+        //Checks if the a todoList with the specified exists
+        var ind = global.todoLists.findIndex(x => x._id === id)
+        if (ind === -1)
+            history.push({
+                pathname: '/'
+            })
+
+        //If the user is redirected to this page from the /todo, then check for the state received to add or update todo
+        if (history.location.state && history.location.state.todo) {
+            processTodo(history.location.state.todo)
+            //clear history.location.state
+            history.replace(`/list/${id}`)
         }
-    }, [])
+
+        //Sort the todoList
+        setGlobal((todoLists) => sortTodosCallback(todoLists, state.sort), null, false)        
+    }, [global.todoLists])
     
     return (
         <div className="home">
-            {loading && <Notification message={'Saving changes please wait...'} />}
+            <Notification message={error} timeout={errorTimeout} />
             <Nav />
             <div className="content">
                 <div className="title">

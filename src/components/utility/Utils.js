@@ -12,6 +12,7 @@ export const tagLists = lists => {
     return lists
 }
 
+//Checks whether the string is alphanumeric
 export const isAlphaNumeric = str => {
     if (!str.match(/^[a-z0-9]+$/i)) {
         return false

@@ -1,7 +1,19 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useRef} from 'react'
 
 const Notification = (prop) => {
-    const [message, setMessage] = useState(null)
+    const mounted = useRef(true)
+    const [message, setMessage_] = useState(null)
+    const [hide, setHide_] = useState(false)
+
+    const setMessage = (msg) => {
+        if (mounted.current === true)
+            setMessage_(() => msg)
+    }
+
+    const setHide = (shouldHide) => {
+        if (mounted.current === true)
+            setHide_(() => shouldHide)
+    }
 
     const objectToString = (obj, preText = '') => {
         var msg = ''
@@ -22,11 +34,17 @@ const Notification = (prop) => {
         if (typeof prop.message === 'object') {
             msg = objectToString(prop.message)
         }
-        setMessage(() => msg)
+        setMessage(msg)
         console.log(msg)
+        setTimeout(() => {
+            setHide(true)
+        }, prop.timeout)
+
+        return () => mounted.current = false
     }, [prop.message])
 
-    if (message == null) return null
+    if (!message) return null
+    if (hide) return null
 
     return (
         <div className='notification'>

@@ -113,7 +113,6 @@ export const requestTodoCreate = async (todoListId, todo) => {
 }
 
 export const requestTodoUpdate = async (todoListId, todo) => {
-    todo.priority = todo.priority.toLowerCase()
     const response = await fetch(ENDPOINT_TODO, {
         method: 'PUT',
         headers: {

@@ -11,3 +11,12 @@ export const priority = {
     HIGH: 'high'
 }
 
+export const todoType = {
+    REGULAR: 'regular',
+    RECURRING: 'recurring'
+}
+
+export const todoRecurringActivity = {
+    POSITIVE: true,
+    NEGATIVE: false
+}

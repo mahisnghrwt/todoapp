@@ -1,9 +1,10 @@
 import React, {useState} from 'react'
 import {useHistory} from 'react-router-dom'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faClock, faEdit, faTrash} from '@fortawesome/free-solid-svg-icons'
-import { requestTodoUpdate, requestTodoDelete } from '../utility/APICalls'
-import {reportType} from '../utility/Definations'
+import {faClock, faEdit, faTrash, faCheckCircle, faTimesCircle, faTimes} from '@fortawesome/free-solid-svg-icons'
+// import {faTimesCircle} from '@fortawesome/free-regular-svg-icons'
+import {requestTodoUpdate, requestTodoDelete, requestTodoRecurringUpdate} from '../utility/APICalls'
+import {reportType, todoType, todoRecurringActivity} from '../utility/Definations'
 
 const LiTodo = ({todoListId, todo, reportParent}) => {
     const [state, setState] = useState({detailedView: false})
@@ -55,6 +56,22 @@ const LiTodo = ({todoListId, todo, reportParent}) => {
         })
     }
 
+    const updateRecurringActivity = (event, recurringActivity) => {
+        event.stopPropagation()
+        const todo_ = JSON.parse(JSON.stringify(todo))
+        todo_.recurring_activity.push(recurringActivity)
+        requestTodoUpdate(todoListId, todo_)
+        .then(response => {
+            if (response.status != 200) {
+                reportParent(reportType.UPDATE, {status: response.status})
+                throw new Error('Error occured while updating Todo!')
+            }
+            else {
+                reportParent(reportType.UPDATE, {status: 200, json: {...todo_}})
+            }
+        })
+    }
+
     const editSelf = event => {
         event.stopPropagation()
         history.push(`/todo?listId=${todoListId}`, {todo})
@@ -63,15 +80,38 @@ const LiTodo = ({todoListId, todo, reportParent}) => {
     return (
         <div className={liTodoClass} onDoubleClick={toggleDetails}>
             <div className="li-todo-basic">
-                <input type="checkbox" checked={todo.compeleted} onClick={done} readOnly/>
-                <span style={todo.compeleted ? {textDecoration: 'line-through'} : {}}>
-                    { todo.title }
+                <span>
+                    <input type="checkbox" checked={todo.compeleted} onClick={done} readOnly/>
+                    <span className='li-todo-title' style={todo.compeleted ? {textDecoration: 'line-through'} : {}}>
+                        { todo.title }
+                    </span>
                 </span>
+
+                {/* Recurring todo only! ---START--- */}
+                {todo.type === todoType.RECURRING && todo.recurring_activity &&
+                    <span className='recurring-todo-status'>
+                        {todo.recurring_activity.map((x, index) => x === true ? <FontAwesomeIcon key={index} className='success-text' icon={faCheckCircle} /> : <FontAwesomeIcon className='danger-text' icon={faTimesCircle} />)}
+                    </span>
+                }
+                {/* Recurring todo only! ---END--- */}
+
                 <span className="li-todo-right">
-                    <div className="indicator">
+                    <span className="indicator">
                         <FontAwesomeIcon className="fa-outline" icon={faClock} />
                         <span className="indicator-count">{age}</span>
-                    </div>
+                    </span>
+                    {/* Recurring todo only! ---START--- */}
+                    {todo.type === todoType.RECURRING &&
+                        <span className='indicator'>
+                            <button className='recurring-todo-button success' onClick={(event) => updateRecurringActivity(event, todoRecurringActivity.POSITIVE)}>
+                                <FontAwesomeIcon icon={faCheckCircle} />
+                            </button>
+                            <button className='recurring-todo-button danger' onClick={(event) => updateRecurringActivity(event, todoRecurringActivity.NEGATIVE)}>
+                                <FontAwesomeIcon icon={faTimesCircle} />
+                            </button>
+                        </span>
+                    }
+                    {/* Recurring todo only! ---END--- */}
                     <span className="indicator">
                         <FontAwesomeIcon icon={faEdit} onClick={editSelf} />
                     </span>

@@ -5,15 +5,16 @@ import Nav from './Nav'
 import {QuickButtons, ButtonC} from './QuickButtons'
 import LiList from './UlList/LiList'
 import CreateListForm from './CreateListForm'
-import {tagLists} from './utility/Utils'
 import {reportType} from './utility/Definations'
 import {requestUpdateListSortingConfig} from './utility/APICalls'
 import {AuthContext} from './Context'
 import Notification from './Notification'
 
-const Home = ({global: [global, setGlobal]}) => {
+const Home = ({global: [global, setGlobal__]}) => {
     const [state, setState] = useState({createListFormEnabled: false})
     const mounted = useRef(true)
+    const [error, setError_] = useState('')
+    const errorTimeout = 10000 //10 seconds
     const sortType = {
         ALPHABETICAL: 'title',
         PENDING_ITEMS: 'pendingCount',
@@ -28,6 +29,7 @@ const Home = ({global: [global, setGlobal]}) => {
     
     //Event handler for "New" list button
     const toggleForm = _ => {
+        if (!mounted.current) return
         setState((prev) => {
             return {
                 ...prev, createListFormEnabled: !prev.createListFormEnabled
@@ -35,78 +37,49 @@ const Home = ({global: [global, setGlobal]}) => {
         })
     }
 
-    //Always update todoLists using this function only.
-    //It ensures todoLists always are tagged.
-    const tagAndUpdateTodoLists = (cb, todoLists = null, makeDeepCopy = false) => {
-        if (!mounted.current) return null
-        setGlobal((prev) => {
-            var temp = todoLists
-            if (!temp)
-                temp = prev.todoLists
+    const setGlobal = (cb, todoLists = null, makeDeepCopy = false) => {
+        if (mounted.current)
+            setGlobal__(cb, todoLists, makeDeepCopy)
+    }
 
-            var todoLists_ = null
-            if (makeDeepCopy)
-                todoLists_ = JSON.parse(JSON.stringify(temp))
-            else
-                todoLists_ = temp
-
-            //tag lists
-            tagLists(todoLists_)
-
-            //If we have callback, process todoLists in it
-            cb(todoLists_)
-            
-            //Update it in global
-            return {
-                ...prev, todoLists: todoLists_
-            }
-        })
+    const setError = err => {
+        if (mounted.current)
+            setError_(() => err)
     }
 
     //Handles subcomponent response received from remote endpoint
     //for reportT, Refer to reportType
     //remoteResponse, {status: number, json: Obj}
     const subComponentReportHandler = (reportT, remoteResponse) => {
+        if (remoteResponse.status != 200) {
+            setError(`status code: ${remoteResponse.status}, error: ${remoteResponse.error}`)
+            return
+        }
         switch(reportT) {
             case reportType.CREATE:
-                if (remoteResponse.status != 200) {
-                    //Error occured, do something here.
-                }
-                else {
-                    tagAndUpdateTodoLists(todoLists => {
-                        todoLists.push(remoteResponse.json)
-                        listSortingCallback(todoLists, authContext.sort)
-                    })
-                }
+                setGlobal(todoLists => {
+                    todoLists.push(remoteResponse.json)
+                    listSortingCallback(todoLists, authContext.sort)
+                }, null, true)
                 toggleForm()
                 break
             case reportType.UPDATE:
-                if (remoteResponse.status != 200) {
-                    //Error occured, do something here.
-                }
-                else {
-                    //remoteResponse.json is the updated list
-                    //Replace the todoList with the updated one in global
-                    tagAndUpdateTodoLists(todoLists => {
-                        var index = todoLists.findIndex(x => x._id == remoteResponse.json._id)
-                        if (index != -1)
-                            todoLists[index] = remoteResponse.json
-                        listSortingCallback(todoLists, authContext.sort)
-                    })
-                }
+                //remoteResponse.json is the updated list
+                //Replace the todoList with the updated one in global
+                setGlobal(todoLists => {
+                    var index = todoLists.findIndex(x => x._id == remoteResponse.json._id)
+                    if (index != -1)
+                        todoLists[index] = remoteResponse.json
+                    listSortingCallback(todoLists, authContext.sort)
+                }, null, true)
                 break
             case reportType.DELETE:
-                if (remoteResponse.status != 200) {
-                    //Error occured, do something here.
-                }
-                else {
-                    //remoteResponse.json._id indicates id of the list to be deleted
-                    tagAndUpdateTodoLists(todoLists => {
-                        const index = todoLists.findIndex(x => x._id === remoteResponse.json.id)
-                        if (index != -1)
-                            todoLists.splice(index, 1)
-                    })
-                }
+                //remoteResponse.json._id indicates id of the list to be deleted
+                setGlobal(todoLists => {
+                    const index = todoLists.findIndex(x => x._id === remoteResponse.json.id)
+                    if (index != -1)
+                        todoLists.splice(index, 1)
+                }, null, true)
                 break
         }
     }
@@ -149,6 +122,8 @@ const Home = ({global: [global, setGlobal]}) => {
         .then(response => {
             if (response.status != 200) {
                 //throw error over here
+                setError(`status code: ${response.status}, error: ${response.error}`)
+
             }
             else {
                 setAuthContext(prev => {
@@ -157,7 +132,7 @@ const Home = ({global: [global, setGlobal]}) => {
                     }
                 })
 
-                tagAndUpdateTodoLists(todoLists => listSortingCallback(todoLists, criteria))
+                setGlobal(todoLists => listSortingCallback(todoLists, criteria), null, false)
             }
         })
     }
@@ -178,20 +153,24 @@ const Home = ({global: [global, setGlobal]}) => {
         if (!global.todoLists) {
             requestAll()
             .then(response => {
-                if (response.status != 200) { 
-                    //Notify the user about the error
-                    return
-                }
+                // if (response.status != 200) { 
+                //     throw new Error(`Error occured while fetching data! ${response.status}`)
+                // }
+                console.log(response.status)
                 return response.json()
             })
             .then(todoLists => {
                 //take the todoLists received in response, sort it out and then save it in global state
-                tagAndUpdateTodoLists(todoLists => listSortingCallback(todoLists, authContext.sort), todoLists)
+                setGlobal(todoLists => listSortingCallback(todoLists, authContext.sort), todoLists, false)
             }) 
+            // .catch(err => {
+            //     setError(err)
+            //     return
+            // })
         }
         else {
             var todoLists = global.todoLists
-            tagAndUpdateTodoLists(todoLists => listSortingCallback(todoLists, authContext.sort), todoLists)
+            setGlobal(todoLists => listSortingCallback(todoLists, authContext.sort), todoLists, false)
         }
 
         return () => mounted.current = false
@@ -199,7 +178,7 @@ const Home = ({global: [global, setGlobal]}) => {
 
     return (
         <div className="home">
-            {/* <Notification message={'small msg!'} /> */}
+            <Notification message={error} timeout={errorTimeout} />
             <Nav />
             <div className="content">
                 <div className="title">

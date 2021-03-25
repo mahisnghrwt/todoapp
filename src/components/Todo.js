@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useHistory } from 'react-router-dom'
 import Nav from './Nav'
 import {QuickButtons, ButtonC} from './QuickButtons'
@@ -6,7 +6,9 @@ import {isAlphaNumeric, isString} from './utility/Utils'
 
 const TodoEdit = () => {
     //priorities enum
+    const mounted = useRef(true)
     const priorities = ["Low", "Moderate", "High"]
+    const types = ['Regular', 'Recurring']
     const property = {
         TITLE: {
             name: 'title',
@@ -19,11 +21,15 @@ const TodoEdit = () => {
         PRIORITY: {
             name: 'priority',
             maxLength: null
+        },
+        TYPE: {
+            name: 'type',
+            maxLength: null
         }
     }
     //local state, required for controlled components
     const [state, setState] = useState({
-        title: "", desc: "", priority: "low"
+        title: "", desc: "", priority: "low", type: 'regular'
     })   
     const [error, setError] = useState({title: '', desc: '', priority: ''})
     const history = useHistory()
@@ -44,8 +50,11 @@ const TodoEdit = () => {
         //Extract todoListId from URL
         setTodoListId(() => history.location.search.split('=')[1])
         if (history.location.state && history.location.state.todo) {
+            if (!mounted.current) return null
             setState(() => history.location.state.todo)
         }
+
+        return () => mounted.current = false
     }, [])
 
     const propertyChanged = (property_, event) => {
@@ -75,6 +84,7 @@ const TodoEdit = () => {
                 ...prev
             }
         })
+        if (!mounted.current) return null
         setState(prev => {
             prev[property_.name] = event.target.value
             return {
@@ -93,6 +103,16 @@ const TodoEdit = () => {
                 <br />
                 <div className="todo-form">
                     <div className="form-row">
+                        <div className="input-group">
+                            <label>Type</label>
+                            <select value={state.type} onChange={(event) => propertyChanged(property.TYPE, event)} >
+                                {
+                                    types.map((x, index) => {
+                                        return <option key={index} value={x.toLowerCase()}>{x}</option>
+                                    })
+                                }
+                            </select>
+                        </div>
                         <div className="input-group">
                             <label>Title</label>
                             <input type="text" value={state.title} onChange={(event) => propertyChanged(property.TITLE, event)} />
