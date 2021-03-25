@@ -78,7 +78,7 @@ html, #root, body {
     color: black;
     font-size: 1.5rem;
     font-weight: bold;
-    margin: 0 0 1rem 0;
+    margin: 0;
     text-align: center;
 }
 
@@ -154,6 +154,20 @@ button {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+}
+
+.li-todo-detailed {
+    display: flex;
+    flex-direction: column;
+}
+
+.recurring-todo-status-grid {
+    display: flex;
+    flex-flow: row nowrap;
+    overflow-x: scroll;
+    height: fit-content;
+    border: 1px solid lightgrey;
+    padding: 0.25rem;
 }
 
 
@@ -378,4 +392,27 @@ input[type=text], select, textarea, option {
 
 .li-todo-title {
     font-weight: 500;
+}
+
+.sub-title {
+    margin: 0;
+    color: #d35400;
+    font-size: .75rem;
+    font-style: italic;
+}
+
+br {
+    margin: 1rem 0;
+}
+
+.br-half {
+    margin: .5rem 0;
+}
+
+.br-quarter {
+    margin: .25rem 0;
+}
+
+.br-halfquarter {
+    margin: .05rem 0;
 }

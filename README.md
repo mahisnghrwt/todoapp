@@ -33,15 +33,15 @@
 - Fix error handling
 - Output relevant error messages to the user via Notification component
 
-- [ ] Display date created for Lists in Home component
-- [ ] Display sorting preference for a list
+- [x] Display date created for Lists in Home component
+- [x] Display sorting preference for a list
 - [ ] Display input validation error for CreateListForm
 
 - [ ] Add functionality to clear all completed Todos
-- [ ] Display date created for Todo in detailed-view
+- [x] Display date created for Todo in detailed-view
     Recurring Todo
     - [ ] Allow to embed a message(and a timestamp) for every action in a recurring todo
-    - [ ] Limit recurring status in 'basic' view
-    - [ ] Show recurring status in detail in 'detailed-view'
+    - [x] Limit recurring status in 'basic' view
+    - [x] Show recurring status in detail in 'detailed-view'
     - [ ] Option to clear activity history
 

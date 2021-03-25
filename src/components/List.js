@@ -240,6 +240,11 @@ const List = ({global: [global, setGlobal__]}) => {
                 <div className="title">
                     {state && state.title}
                 </div>
+                <div className="title sub-title">
+                    Sorting by: {state.sort}
+                </div>
+                <br />
+                <br />
                 <>
                     <QuickButtons buttons={buttons} />
                     <br />

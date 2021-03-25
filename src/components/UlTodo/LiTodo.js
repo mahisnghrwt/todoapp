@@ -11,6 +11,8 @@ const LiTodo = ({todoListId, todo, reportParent}) => {
     const history = useHistory()
     const msInHours = 3600000
     const liTodoClass = `li-todo ${todo.priority}-priority`
+    const created_at = new Date(todo.created_at).toLocaleString()
+    const briefStatusLimit = 5
 
     var age = (new Date() - new Date(todo.created_at)) / msInHours
     if (age > 24 ) { 
@@ -77,6 +79,11 @@ const LiTodo = ({todoListId, todo, reportParent}) => {
         history.push(`/todo?listId=${todoListId}`, {todo})
     }
 
+    var breifStatus = []
+    for (var i = 0; i < briefStatusLimit && i < todo.recurring_activity.length; i++) {
+        breifStatus.push(todo.recurring_activity[todo.recurring_activity.length - 1 - i])
+    }
+
     return (
         <div className={liTodoClass} onDoubleClick={toggleDetails}>
             <div className="li-todo-basic">
@@ -90,7 +97,7 @@ const LiTodo = ({todoListId, todo, reportParent}) => {
                 {/* Recurring todo only! ---START--- */}
                 {todo.type === todoType.RECURRING && todo.recurring_activity &&
                     <span className='recurring-todo-status'>
-                        {todo.recurring_activity.map((x, index) => x === true ? <FontAwesomeIcon key={index} className='success-text' icon={faCheckCircle} /> : <FontAwesomeIcon className='danger-text' icon={faTimesCircle} />)}
+                        {breifStatus.map((x, index) => x === true ? <FontAwesomeIcon key={index} className='success-text' icon={faCheckCircle} /> : <FontAwesomeIcon className='danger-text' icon={faTimesCircle} />)}
                     </span>
                 }
                 {/* Recurring todo only! ---END--- */}
@@ -122,7 +129,18 @@ const LiTodo = ({todoListId, todo, reportParent}) => {
             </div>
             {state.detailedView && 
                 <div className="li-todo-detailed">
-                    {todo.desc}
+                    <div className='br-halfquarter' />
+                    <div className='todo-desc'>
+                        {!todo.desc ? "No description." : todo.desc}
+                    </div>
+                    <div className='br-halfquarter' />
+                    {todo.type === todoType.RECURRING &&
+                    <div className='recurring-todo-status recurring-todo-status-grid'>
+                        {todo.recurring_activity.map((x, index) => x === true ? <FontAwesomeIcon key={index} className='success-text' icon={faCheckCircle} /> : <FontAwesomeIcon className='danger-text' icon={faTimesCircle} />)}
+                    </div>
+                    }
+                    <div className='br-halfquarter' />
+                    <div className='indicator-count'>{created_at}</div>
                 </div>
             }
         </div>

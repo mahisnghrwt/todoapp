@@ -184,6 +184,11 @@ const Home = ({global: [global, setGlobal__]}) => {
                 <div className="title">
                     My Lists
                 </div>
+                <div className="title sub-title">
+                    Sorting by: {authContext.sort}
+                </div>
+                <br />
+                <br />
                 <QuickButtons buttons={buttons}/>
                 <br />
                 {state.createListFormEnabled && <CreateListForm reportParent={subComponentReportHandler}/>}

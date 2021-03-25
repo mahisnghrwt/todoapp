@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import {useHistory} from 'react-router-dom'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faExclamation, faExclamationTriangle, faTrashAlt, faEdit, faSave} from '@fortawesome/free-solid-svg-icons'
+import {faExclamation, faExclamationTriangle, faTrashAlt, faEdit, faSave, faClock} from '@fortawesome/free-solid-svg-icons'
 
 import {requestDelete, requestUpdate} from '../utility/APICalls'
 import {reportType} from '../utility/Definations'
@@ -9,6 +9,7 @@ import {reportType} from '../utility/Definations'
 const LiList = ({list, reportParent}) => {
     const history = useHistory()
     const [state, setState] = useState({rename: false, newTitle: ""})
+    const age = new Date(list.created_at).toLocaleString()
 
     const clicked = _ => {
         history.push({
@@ -79,6 +80,10 @@ const LiList = ({list, reportParent}) => {
                 <FontAwesomeIcon onClick={toggleRename} className="fa-rename" icon={faEdit} />
             </span>}
             <span className="li-list-right">
+                <span className="indicator">
+                    <FontAwesomeIcon className="fa-outline" icon={faClock} />
+                    <span className="indicator-count">{age}</span>
+                </span>
                 <span className="indicator-group">
                     <span className="indicator">
                         <FontAwesomeIcon className="danger-text indicator-fa" icon={faExclamation} />
